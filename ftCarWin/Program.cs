@@ -16,7 +16,7 @@ namespace ftCarWin
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FrmButtonControl());
+            Application.Run(new FrmFtControl());
         }
     }
 }
