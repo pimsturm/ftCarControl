@@ -26,7 +26,10 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.rBtnBluetooth = new System.Windows.Forms.RadioButton();
             this.radioBtnSerial = new System.Windows.Forms.RadioButton();
+            this.btnScan = new System.Windows.Forms.Button();
+            this.gridDevices = new System.Windows.Forms.DataGridView();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridDevices)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -62,16 +65,43 @@
             this.radioBtnSerial.Text = "Serial port";
             this.radioBtnSerial.UseVisualStyleBackColor = true;
             // 
+            // btnScan
+            // 
+            this.btnScan.Location = new System.Drawing.Point(12, 72);
+            this.btnScan.Name = "btnScan";
+            this.btnScan.Size = new System.Drawing.Size(197, 23);
+            this.btnScan.TabIndex = 9;
+            this.btnScan.Text = "Scan Bluetooth devices";
+            this.btnScan.UseVisualStyleBackColor = true;
+            this.btnScan.Click += new System.EventHandler(this.btnScan_Click);
+            // 
+            // gridDevices
+            // 
+            this.gridDevices.AllowUserToAddRows = false;
+            this.gridDevices.AllowUserToDeleteRows = false;
+            this.gridDevices.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.gridDevices.Location = new System.Drawing.Point(12, 102);
+            this.gridDevices.Name = "gridDevices";
+            this.gridDevices.ReadOnly = true;
+            this.gridDevices.Size = new System.Drawing.Size(240, 150);
+            this.gridDevices.TabIndex = 10;
+            // 
             // FrmSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Controls.Add(this.gridDevices);
+            this.Controls.Add(this.btnScan);
             this.Controls.Add(this.groupBox1);
             this.Name = "FrmSettings";
             this.Text = "FrmSettings";
+            this.Load += new System.EventHandler(this.FrmSettings_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridDevices)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -81,5 +111,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RadioButton rBtnBluetooth;
         private System.Windows.Forms.RadioButton radioBtnSerial;
+        private System.Windows.Forms.Button btnScan;
+        private System.Windows.Forms.DataGridView gridDevices;
     }
 }
