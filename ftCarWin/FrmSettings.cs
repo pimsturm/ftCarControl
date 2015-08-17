@@ -17,15 +17,29 @@ namespace ftCarWin {
 
         public FrmSettings() {
             InitializeComponent();
+
+            radioBtnSerial.Tag = TransportChannel.SerialPort;
+            radioBtnBluetooth.Tag = TransportChannel.BlueTooth;
+
+            switch (Properties.Settings.Default.TransportChannel) {
+                case (int)TransportChannel.SerialPort:
+                    radioBtnSerial.Checked = true;
+                    break;
+                case (int)TransportChannel.BlueTooth:
+                    radioBtnBluetooth.Checked = true;
+                    break;
+            }
+            
         }
 
         private void radioBtnSerial_CheckedChanged(object sender, EventArgs e) {
             string result1 = null;
-            foreach (Control control in this.groupBox1.Controls) {
+            foreach (Control control in this.groupTransportChannel.Controls) {
                 if (control is RadioButton) {
                     RadioButton radio = control as RadioButton;
                     if (radio.Checked) {
                         result1 = radio.Text;
+                        Properties.Settings.Default.TransportChannel = (int)radio.Tag;
                         MessageBox.Show(result1);
                     }
                 }
@@ -33,8 +47,10 @@ namespace ftCarWin {
         }
 
         private void btnScan_Click(object sender, EventArgs e) {
+            // Start discovering devices
             BluetoothDeviceInfo[] devices = BluetoothDeviceManager.LocalClient.DiscoverDevices(65536);
 
+            // Load the discovered devices in the binding source of the grid
             bs.Clear();
             foreach (BluetoothDeviceInfo device in devices) {
                 bs.Add(new BtDevice(device));
@@ -43,6 +59,7 @@ namespace ftCarWin {
         }
 
         private void FrmSettings_Load(object sender, EventArgs e) {
+            // Format the gird and bind each column to a property in the datasource.
             bs.DataSource = typeof(BtDevice);
 
             gridDevices.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
@@ -81,6 +98,10 @@ namespace ftCarWin {
 
             gridDevices.Columns.Add(rememberedCol);
 
+        }
+
+        private void FrmSettings_Deactivate(object sender, EventArgs e) {
+            Properties.Settings.Default.Save();
         }
     }
 }

@@ -23,36 +23,36 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.rBtnBluetooth = new System.Windows.Forms.RadioButton();
+            this.groupTransportChannel = new System.Windows.Forms.GroupBox();
+            this.radioBtnBluetooth = new System.Windows.Forms.RadioButton();
             this.radioBtnSerial = new System.Windows.Forms.RadioButton();
             this.btnScan = new System.Windows.Forms.Button();
             this.gridDevices = new System.Windows.Forms.DataGridView();
-            this.groupBox1.SuspendLayout();
+            this.groupTransportChannel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridDevices)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.rBtnBluetooth);
-            this.groupBox1.Controls.Add(this.radioBtnSerial);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(197, 53);
-            this.groupBox1.TabIndex = 8;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Connection";
+            this.groupTransportChannel.Controls.Add(this.radioBtnBluetooth);
+            this.groupTransportChannel.Controls.Add(this.radioBtnSerial);
+            this.groupTransportChannel.Location = new System.Drawing.Point(12, 12);
+            this.groupTransportChannel.Name = "groupBox1";
+            this.groupTransportChannel.Size = new System.Drawing.Size(197, 53);
+            this.groupTransportChannel.TabIndex = 8;
+            this.groupTransportChannel.TabStop = false;
+            this.groupTransportChannel.Text = "Connection";
             // 
-            // rBtnBluetooth
+            // radioBtnBluetooth
             // 
-            this.rBtnBluetooth.AutoSize = true;
-            this.rBtnBluetooth.Location = new System.Drawing.Point(12, 34);
-            this.rBtnBluetooth.Name = "rBtnBluetooth";
-            this.rBtnBluetooth.Size = new System.Drawing.Size(70, 17);
-            this.rBtnBluetooth.TabIndex = 8;
-            this.rBtnBluetooth.TabStop = true;
-            this.rBtnBluetooth.Text = "Bluetooth";
-            this.rBtnBluetooth.UseVisualStyleBackColor = true;
+            this.radioBtnBluetooth.AutoSize = true;
+            this.radioBtnBluetooth.Location = new System.Drawing.Point(12, 34);
+            this.radioBtnBluetooth.Name = "radioBtnBluetooth";
+            this.radioBtnBluetooth.Size = new System.Drawing.Size(70, 17);
+            this.radioBtnBluetooth.TabIndex = 8;
+            this.radioBtnBluetooth.TabStop = true;
+            this.radioBtnBluetooth.Text = "Bluetooth";
+            this.radioBtnBluetooth.UseVisualStyleBackColor = true;
             // 
             // radioBtnSerial
             // 
@@ -64,6 +64,7 @@
             this.radioBtnSerial.TabStop = true;
             this.radioBtnSerial.Text = "Serial port";
             this.radioBtnSerial.UseVisualStyleBackColor = true;
+            this.radioBtnSerial.CheckedChanged += new System.EventHandler(this.radioBtnSerial_CheckedChanged);
             // 
             // btnScan
             // 
@@ -95,12 +96,13 @@
             this.ClientSize = new System.Drawing.Size(284, 261);
             this.Controls.Add(this.gridDevices);
             this.Controls.Add(this.btnScan);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.groupTransportChannel);
             this.Name = "FrmSettings";
             this.Text = "FrmSettings";
+            this.Deactivate += new System.EventHandler(this.FrmSettings_Deactivate);
             this.Load += new System.EventHandler(this.FrmSettings_Load);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.groupTransportChannel.ResumeLayout(false);
+            this.groupTransportChannel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridDevices)).EndInit();
             this.ResumeLayout(false);
 
@@ -108,8 +110,8 @@
 
         #endregion
 
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.RadioButton rBtnBluetooth;
+        private System.Windows.Forms.GroupBox groupTransportChannel;
+        private System.Windows.Forms.RadioButton radioBtnBluetooth;
         private System.Windows.Forms.RadioButton radioBtnSerial;
         private System.Windows.Forms.Button btnScan;
         private System.Windows.Forms.DataGridView gridDevices;
