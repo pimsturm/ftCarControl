@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using CommandMessenger;
 using CommandMessenger.Transport;
 using CommandMessenger.Transport.Serial;
@@ -13,33 +14,39 @@ namespace ftCarWin
       kRightMotor,
       kLight,
       kSettings,
-      kStatus              , // Command to report status
-      Identify,           // Command to identify device
+      kStatus,              // Command to report status
+      Identify,             // Command to identify device
     };
 
     public class ArduinoCommunicator
     {
         private static ITransport _transport;
-        private SerialTransport _serialTransport;
         private CmdMessenger _cmdMessenger;
         private static ConnectionManager _connectionManager;
 
         // Most of the time you want to be sure you are connecting with the correct device.        
         private const string CommunicationIdentifier = "BFAF4176-766E-436A-ADF2-96133C02B03C";
 
-        // Setup function
-        public void Setup()
+        public void Setup() {
+            if (Properties.Settings.Default.TransportChannel == (int)TransportChannel.SerialPort) {
+                Debug.WriteLine("Serial port");
+                SetupSerial();
+            } else {
+                Debug.WriteLine("BlueTooth");
+                SetupBt();
+            }
+        }
+
+        // Setup function for serial port
+        public void SetupSerial()
         {
             // Create Serial Port object
             // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
-            _serialTransport = new SerialTransport
-            {
-                CurrentSerialSettings = { PortName = "COM3", BaudRate = 9600, DtrEnable = false } // object initializer
-            };
+            _transport = GetTransport(TransportChannel.SerialPort);
 
             // Initialize the command messenger with the Serial Port transport layer
             // Set if it is communicating with a 16- or 32-bit Arduino board
-            _cmdMessenger = new CmdMessenger(_serialTransport, BoardType.Bit16);
+            _cmdMessenger = new CmdMessenger(_transport, BoardType.Bit16);
 
             // Attach the callbacks to the Command Messenger
             AttachCommandCallBacks();
@@ -54,18 +61,10 @@ namespace ftCarWin
             _cmdMessenger.Connect();
         }
 
-        public void Setup_bt()
+        public void SetupBt()
         {
             // Now let us set Bluetooth transport
-            _transport = new BluetoothTransport()
-            {
-                // If you know your bluetooth device and you have already paired
-                // you can directly connect to you Bluetooth Device by adress adress.
-                // Under windows you can find the adresss at:
-                //    Control Panel >> All Control Panel Items >> Devices and Printers
-                //    Right-click on device >> properties >> Unique id
-                CurrentBluetoothDeviceInfo = BluetoothUtils.DeviceByAdress("20:13:07:26:10:08")
-            };
+            _transport = GetTransport(TransportChannel.BlueTooth);
 
             // Initialize the command messenger with the Serial Port transport layer
             // Set if it is communicating with a 16- or 32-bit Arduino board
@@ -110,10 +109,10 @@ namespace ftCarWin
                 }
             };
 
-            // Show all connection progress on command line             
+            // Show all connection progress in the output window
             _connectionManager.Progress += (sender, eventArgs) =>
             {
-                if (eventArgs.Level <= 3) Console.WriteLine(eventArgs.Description);
+                if (eventArgs.Level <= 3) Debug.WriteLine(eventArgs.Description);
             };
 
             // If connection found, tell the arduino to turn the (internal) led on
@@ -129,11 +128,11 @@ namespace ftCarWin
             _connectionManager.StartConnectionManager();
         }
 
-        private static ITransport GetTransport(Transport transportChosen)
+        private static ITransport GetTransport(TransportChannel transportChosen)
         {
             switch (transportChosen)
             {
-                case Transport.Serial :
+                case TransportChannel.SerialPort :
                     // Create Serial Port object
                     // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
                     return new SerialTransport
@@ -141,7 +140,7 @@ namespace ftCarWin
                         CurrentSerialSettings = { PortName = "COM3", BaudRate = 9600, DtrEnable = false } // object initializer
                     };
 
-                case Transport.Bluetooth:
+                case TransportChannel.BlueTooth :
                     return new BluetoothTransport()
                     {
                         // If you know your bluetooth device and you have already paired
@@ -152,7 +151,7 @@ namespace ftCarWin
                         CurrentBluetoothDeviceInfo = BluetoothUtils.DeviceByAdress("20:13:07:26:10:08")
                     };
 
-                case Transport.Network:
+                case TransportChannel.Network:
                     throw new NotImplementedException();
 
             }
@@ -188,25 +187,25 @@ namespace ftCarWin
         // Called when a received command has no attached function.
         void OnUnknownCommand(ReceivedCommand arguments)
         {
-            Console.WriteLine("Command without attached callback received");
+            Debug.WriteLine("Command without attached callback received");
         }
 
         // Callback function that prints that the Arduino has acknowledged
         void OnAcknowledge(ReceivedCommand arguments)
         {
-            Console.WriteLine(" Arduino is ready");
+            Debug.WriteLine(" Arduino is ready");
         }
 
         // Log received line to console
         private void NewLineReceived(object sender, CommandEventArgs e)
         {
-            Console.WriteLine(@"Received > " + e.Command.CommandString());
+            Debug.WriteLine(@"Received > " + e.Command.CommandString());
         }
 
         // Log sent line to console
         private void NewLineSent(object sender, CommandEventArgs e)
         {
-            Console.WriteLine(@"Sent > " + e.Command.CommandString());
+            Debug.WriteLine(@"Sent > " + e.Command.CommandString());
         }
 
         // Exit function
@@ -219,11 +218,10 @@ namespace ftCarWin
             _cmdMessenger.Dispose();
 
             // Dispose Serial Port object
-            _serialTransport.Dispose();
+            _transport.Dispose();
 
             // Pause before stop
-            Console.WriteLine("Press any key to stop...");
-            Console.ReadKey();
+            Debug.WriteLine("Exit from Arduino Communicator");
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,7 +20,6 @@ namespace ftCarWin
         {
             InitializeComponent();
             _arduinoCommunicator = new ArduinoCommunicator();
-            _arduinoCommunicator.Setup();
         }
 
         private void btnLight_Click(object sender, EventArgs e)
@@ -35,6 +35,16 @@ namespace ftCarWin
                 btnLight.Text = "On";
                 _arduinoCommunicator.SwitchLightOff();
             }
+        }
+
+        private void FrmButtonControl_Enter(object sender, EventArgs e) {
+            Debug.WriteLine("Enter");
+            _arduinoCommunicator.Setup();
+        }
+
+        private void FrmButtonControl_Leave(object sender, EventArgs e) {
+            Debug.WriteLine("Leave");
+            _arduinoCommunicator.Exit();
         }
 
     }

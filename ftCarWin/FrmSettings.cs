@@ -33,14 +33,12 @@ namespace ftCarWin {
         }
 
         private void radioBtnSerial_CheckedChanged(object sender, EventArgs e) {
-            string result1 = null;
             foreach (Control control in this.groupTransportChannel.Controls) {
                 if (control is RadioButton) {
                     RadioButton radio = control as RadioButton;
                     if (radio.Checked) {
-                        result1 = radio.Text;
                         Properties.Settings.Default.TransportChannel = (int)radio.Tag;
-                        MessageBox.Show(result1);
+                        Properties.Settings.Default.Save();
                     }
                 }
             }
@@ -59,7 +57,7 @@ namespace ftCarWin {
         }
 
         private void FrmSettings_Load(object sender, EventArgs e) {
-            // Format the gird and bind each column to a property in the datasource.
+            // Format the grid and bind each column to a property in the datasource.
             bs.DataSource = typeof(BtDevice);
 
             gridDevices.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
@@ -100,8 +98,5 @@ namespace ftCarWin {
 
         }
 
-        private void FrmSettings_Deactivate(object sender, EventArgs e) {
-            Properties.Settings.Default.Save();
-        }
     }
 }

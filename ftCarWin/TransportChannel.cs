@@ -11,5 +11,9 @@
         /// BlueTooth
         /// </summary>
         BlueTooth,
+        /// <summary>
+        /// Network
+        /// </summary>
+        Network,
     }
 }

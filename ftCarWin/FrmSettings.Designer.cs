@@ -32,12 +32,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.gridDevices)).BeginInit();
             this.SuspendLayout();
             // 
-            // groupBox1
+            // groupTransportChannel
             // 
             this.groupTransportChannel.Controls.Add(this.radioBtnBluetooth);
             this.groupTransportChannel.Controls.Add(this.radioBtnSerial);
             this.groupTransportChannel.Location = new System.Drawing.Point(12, 12);
-            this.groupTransportChannel.Name = "groupBox1";
+            this.groupTransportChannel.Name = "groupTransportChannel";
             this.groupTransportChannel.Size = new System.Drawing.Size(197, 53);
             this.groupTransportChannel.TabIndex = 8;
             this.groupTransportChannel.TabStop = false;
@@ -99,7 +99,6 @@
             this.Controls.Add(this.groupTransportChannel);
             this.Name = "FrmSettings";
             this.Text = "FrmSettings";
-            this.Deactivate += new System.EventHandler(this.FrmSettings_Deactivate);
             this.Load += new System.EventHandler(this.FrmSettings_Load);
             this.groupTransportChannel.ResumeLayout(false);
             this.groupTransportChannel.PerformLayout();
