@@ -93,8 +93,6 @@
             this.Controls.Add(this.btnLight);
             this.Name = "FrmButtonControl";
             this.Text = "Button control";
-            this.Enter += new System.EventHandler(this.FrmButtonControl_Enter);
-            this.Leave += new System.EventHandler(this.FrmButtonControl_Leave);
             this.ResumeLayout(false);
 
         }

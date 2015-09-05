@@ -37,8 +37,12 @@ namespace ftCarWin {
                 if (control is RadioButton) {
                     RadioButton radio = control as RadioButton;
                     if (radio.Checked) {
+                        // Settings changed, save it
                         Properties.Settings.Default.TransportChannel = (int)radio.Tag;
                         Properties.Settings.Default.Save();
+
+                        // Restart the Arduino communicator with the new settings
+                        ArduinoCommunicator.Setup();
                     }
                 }
             }
