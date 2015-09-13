@@ -36,6 +36,22 @@ namespace ftCarWin
             }
         }
 
+        private void btnForward_Click(object sender, EventArgs e) {
+            ArduinoCommunicator.MotorForward();
+        }
+
+        private void btnBackward_Click(object sender, EventArgs e) {
+            ArduinoCommunicator.MotorBackward();
+        }
+
+        private void btnLeft_Click(object sender, EventArgs e) {
+            ArduinoCommunicator.MotorToLeft();
+        }
+
+        private void btnRight_Click(object sender, EventArgs e) {
+            ArduinoCommunicator.MotorToRight();
+        }
+
 
     }
 }

@@ -53,6 +53,7 @@
             this.btnForward.TabIndex = 1;
             this.btnForward.Text = "Forward";
             this.btnForward.UseVisualStyleBackColor = true;
+            this.btnForward.Click += new System.EventHandler(this.btnForward_Click);
             // 
             // btnBackward
             // 
@@ -62,6 +63,7 @@
             this.btnBackward.TabIndex = 2;
             this.btnBackward.Text = "Backward";
             this.btnBackward.UseVisualStyleBackColor = true;
+            this.btnBackward.Click += new System.EventHandler(this.btnBackward_Click);
             // 
             // btnLeft
             // 
@@ -71,6 +73,7 @@
             this.btnLeft.TabIndex = 3;
             this.btnLeft.Text = "Left";
             this.btnLeft.UseVisualStyleBackColor = true;
+            this.btnLeft.Click += new System.EventHandler(this.btnLeft_Click);
             // 
             // btnRight
             // 
@@ -80,6 +83,7 @@
             this.btnRight.TabIndex = 4;
             this.btnRight.Text = "Right";
             this.btnRight.UseVisualStyleBackColor = true;
+            this.btnRight.Click += new System.EventHandler(this.btnRight_Click);
             // 
             // FrmButtonControl
             // 
