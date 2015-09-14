@@ -14,6 +14,7 @@ namespace ftCarWin {
         kSettings,
         kStatus,              // Command to report status
         kIdentify,            // Command to identify device
+        kStopMotor,
     };
 
     public static class ArduinoCommunicator {
@@ -27,6 +28,11 @@ namespace ftCarWin {
         // Maximum speed interval of the Arduino motor shield
         private const int pwmMotorLeft = 255;
         private const int pwmMotorRight = 255;
+
+        /// <summary>
+        /// Gets or sets the number of seconds after which the car stops.
+        /// </summary>
+        public static int TimeOut { get; set; }
 
         /// <summary>
         /// Setup the communicator for the chosen transport channel
@@ -223,6 +229,14 @@ namespace ftCarWin {
         }
 
         /// <summary>
+        /// Send a command to stop the car
+        /// </summary>
+        public static void MotorStop() {
+            var command = new SendCommand((int)Command.kStopMotor);
+            _cmdMessenger.SendCommand(command);
+        }
+
+        /// <summary>
         /// Send commands to make the car move to the left
         /// </summary>
         public static void MotorToLeft() {
@@ -272,9 +286,9 @@ namespace ftCarWin {
         private static void OnSettingsReceived(ReceivedCommand arguments) {
             Debug.WriteLine("Settings received from Arduino.");
 
-            var timeOut = arguments.ReadInt16Arg();
+            TimeOut = arguments.ReadInt16Arg();
 
-            Debug.WriteLine("Timeout: <1>", timeOut);
+            Debug.WriteLine("Timeout: {0}", TimeOut);
         }
 
         // Log received line to console

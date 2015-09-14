@@ -100,6 +100,8 @@ namespace ftCarWin {
 
             gridDevices.Columns.Add(rememberedCol);
 
+            numSeconds.Value = ArduinoCommunicator.TimeOut;
+
         }
 
     }

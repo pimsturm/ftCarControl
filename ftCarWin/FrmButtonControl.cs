@@ -52,6 +52,10 @@ namespace ftCarWin
             ArduinoCommunicator.MotorToRight();
         }
 
+        private void btnStop_Click(object sender, EventArgs e) {
+            ArduinoCommunicator.MotorStop();
+        }
+
 
     }
 }
