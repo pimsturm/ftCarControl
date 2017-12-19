@@ -102,7 +102,7 @@ namespace ftCarWin {
                     // Create Serial Port object
                     // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
                     return new SerialTransport {
-                        CurrentSerialSettings = { PortName = "COM3", BaudRate = 9600, DtrEnable = false } // object initializer
+                        CurrentSerialSettings = { PortName = "COM7", BaudRate = 9600, DtrEnable = false } // object initializer
                     };
 
                 case TransportChannel.BlueTooth:
