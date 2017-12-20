@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ftCarWin", "ftCarWin\ftCarWin.csproj", "{534F8DAD-F441-4F5B-965A-C64E5F9BCC0A}"
 EndProject
@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Packages", "Packages", "{88
 		Packages\CommandMessenger.Transport.Serial.dll = Packages\CommandMessenger.Transport.Serial.dll
 		Packages\InTheHand.Net.Personal.dll = Packages\InTheHand.Net.Personal.dll
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CmdMessenger", "CmdMessenger\CmdMessenger.csproj", "{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,11 +31,22 @@ Global
 		{534F8DAD-F441-4F5B-965A-C64E5F9BCC0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{534F8DAD-F441-4F5B-965A-C64E5F9BCC0A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{534F8DAD-F441-4F5B-965A-C64E5F9BCC0A}.Release|x86.ActiveCfg = Release|Any CPU
+		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Debug|x86.Build.0 = Debug|Any CPU
+		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Release|x86.ActiveCfg = Release|Any CPU
+		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{884A5B1D-2916-4989-B47C-50B69A74E4A4} = {0BB12373-D8FB-459E-BBB3-689D2FE6B95C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {74C832E8-8A1F-46BA-9170-7F6263C79093}
 	EndGlobalSection
 EndGlobal
