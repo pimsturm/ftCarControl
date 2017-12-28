@@ -1,10 +1,6 @@
 ﻿using InTheHand.Net;
 using InTheHand.Net.Sockets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ftCarWin {
     /// <summary>
@@ -31,6 +27,10 @@ namespace ftCarWin {
         /// </summary>
         public Boolean Remembered { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BtDevice"/>
+        /// </summary>
+        /// <param name="device">Properties of the Buetooth device</param>
         public BtDevice(BluetoothDeviceInfo device) {
             Authenticated = device.Authenticated;
             DeviceAddress = device.DeviceAddress;
@@ -38,6 +38,9 @@ namespace ftCarWin {
             Remembered = device.Remembered;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BtDevice"/>
+        /// </summary>
         public BtDevice(){}
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -115,6 +116,7 @@ namespace CmdMessenger
             while (!this.cancellationTokenSource.IsCancellationRequested) {
                 try {
                     IReceivedCommand command = await this.client.ReadAsync(this.cancellationTokenSource.Token);
+                    Debug.WriteLine("Received: "+ command.CommandId.ToString());
                     if (this.inflightCommands.ContainsKey(command.CommandId)) {
                         this.inflightCommands[command.CommandId].TrySetResult(command);
                     }

@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Packages", "Packages", "{88
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CmdMessenger", "CmdMessenger\CmdMessenger.csproj", "{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArduinoCommunicator", "ArduinoCommunicator\ArduinoCommunicator.csproj", "{A05CB237-94FB-452A-82CF-C0D559B61036}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,14 @@ Global
 		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Release|x86.ActiveCfg = Release|Any CPU
 		{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}.Release|x86.Build.0 = Release|Any CPU
+		{A05CB237-94FB-452A-82CF-C0D559B61036}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A05CB237-94FB-452A-82CF-C0D559B61036}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A05CB237-94FB-452A-82CF-C0D559B61036}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A05CB237-94FB-452A-82CF-C0D559B61036}.Debug|x86.Build.0 = Debug|Any CPU
+		{A05CB237-94FB-452A-82CF-C0D559B61036}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A05CB237-94FB-452A-82CF-C0D559B61036}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A05CB237-94FB-452A-82CF-C0D559B61036}.Release|x86.ActiveCfg = Release|Any CPU
+		{A05CB237-94FB-452A-82CF-C0D559B61036}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

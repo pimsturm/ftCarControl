@@ -19,7 +19,7 @@ namespace ftCarWin {
 
     public static class ArduinoCommunicator {
         private static ITransport _transport;
-        private static CmdMessenger _cmdMessenger;
+        private static CommandMessenger.CmdMessenger _cmdMessenger;
         private static ConnectionManager _connectionManager;
 
         // Most of the time you want to be sure you are connecting with the correct device.        
@@ -60,7 +60,7 @@ namespace ftCarWin {
 
             // Initialize the command messenger with the chosen transport layer
             // Set if it is communicating with a 16- or 32-bit Arduino board
-            _cmdMessenger = new CmdMessenger(_transport, BoardType.Bit16) {
+            _cmdMessenger = new CommandMessenger.CmdMessenger(_transport, BoardType.Bit16) {
                 PrintLfCr = false // Do not print newLine at end of command, to reduce data being sent
             };
 

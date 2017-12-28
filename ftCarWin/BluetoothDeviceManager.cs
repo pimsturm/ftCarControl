@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using InTheHand.Net;
 using InTheHand.Net.Bluetooth;
@@ -17,17 +14,8 @@ namespace ftCarWin {
 
         private static readonly List<BluetoothDeviceInfo> DeviceList;
 
-        private static readonly List<string> CommonDevicePins = new List<string>
-            {
-                "0000",
-                "1111",
-                "1234"
-            };
-
         static BluetoothDeviceManager()
         {
-            // Define common Pin codes for Bluetooth devices
-
             PrimaryRadio = BluetoothRadio.PrimaryRadio;
             if (PrimaryRadio == null) {
                Debug.Write("No radio hardware or unsupported software stack");

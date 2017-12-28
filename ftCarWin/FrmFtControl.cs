@@ -16,11 +16,12 @@ namespace ftCarWin {
 
         private void tvCarControl_AfterSelect(object sender, TreeViewEventArgs e) {
             this.splitNavBar.Panel2.Controls.Clear();
-            Form dockedForm = (Form)e.Node.Tag;
-            // Check if a docked form is assotated with the selected node;
+            IDockedForm dockedForm = (IDockedForm)e.Node.Tag;
+            // Check if a docked form is associated with the selected node;
             // the root node does not have a form.
             if (dockedForm != null) {
-                this.splitNavBar.Panel2.Controls.Add(dockedForm);
+                this.splitNavBar.Panel2.Controls.Add((Form)dockedForm);
+                dockedForm.InitHandlers();
                 dockedForm.Show();
             }
 

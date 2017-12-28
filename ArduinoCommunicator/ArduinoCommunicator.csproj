@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{26D8A852-FDA8-4DD1-96FA-9001738AA9B5}</ProjectGuid>
+    <ProjectGuid>{A05CB237-94FB-452A-82CF-C0D559B61036}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CmdMessenger</RootNamespace>
-    <AssemblyName>CmdMessenger</AssemblyName>
+    <RootNamespace>ArduinoCommunicator</RootNamespace>
+    <AssemblyName>ArduinoCommunicator</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -30,10 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="InTheHand.Net.Personal, Version=3.5.605.0, Culture=neutral, PublicKeyToken=ea38caa273134499, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Packages\32feet.NET.3.7.0.0\lib\net\InTheHand.Net.Personal.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -44,24 +40,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CmdComms\BluetoothCmdClient.cs" />
-    <Compile Include="CmdComms\CmdComms.cs" />
-    <Compile Include="CmdComms\ICmdComms.cs" />
-    <Compile Include="CmdComms\SerialCmdClient.cs" />
-    <Compile Include="CmdComms\TcpCmdClient.cs" />
-    <Compile Include="CmdMessenger.cs" />
-    <Compile Include="CommandObserver.cs" />
-    <Compile Include="Commands\IReceivedCommand.cs" />
-    <Compile Include="Commands\ISendCommand.cs" />
-    <Compile Include="Commands\ReceivedCommand.cs" />
-    <Compile Include="Commands\SendCommand.cs" />
-    <Compile Include="Escaping.cs" />
-    <Compile Include="ICommandObserver.cs" />
-    <Compile Include="IEscaping.cs" />
+    <Compile Include="ArduinoCommands.cs" />
+    <Compile Include="CmdFactory.cs" />
+    <Compile Include="Commands\Fault.cs" />
+    <Compile Include="Commands\GetMotorSpeed.cs" />
+    <Compile Include="Commands\GetMotorSpeedResponse.cs" />
+    <Compile Include="Commands\Ping.cs" />
+    <Compile Include="Commands\PingResponse.cs" />
+    <Compile Include="Commands\SendMotorSpeed.cs" />
+    <Compile Include="Commands\SetMotorSpeed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\CmdMessenger\CmdMessenger.csproj">
+      <Project>{26d8a852-fda8-4dd1-96fa-9001738aa9b5}</Project>
+      <Name>CmdMessenger</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

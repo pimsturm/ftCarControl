@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using CommandMessenger.Transport.Bluetooth;
 using InTheHand.Net.Sockets;
 
 namespace ftCarWin {
 
-    public partial class FrmSettings : Form {
+    public partial class FrmSettings : Form, IDockedForm
+    {
         BindingSource bs = new BindingSource();
 
         public FrmSettings() {
@@ -32,6 +25,11 @@ namespace ftCarWin {
             
         }
 
+        /// <summary>
+        /// Reinitialize the handlers
+        /// </summary>
+        public void InitHandlers() { }
+
         private void radioBtnSerial_CheckedChanged(object sender, EventArgs e) {
             foreach (Control control in this.groupTransportChannel.Controls) {
                 if (control is RadioButton) {
@@ -40,9 +38,6 @@ namespace ftCarWin {
                         // Settings changed, save it
                         Properties.Settings.Default.TransportChannel = (int)radio.Tag;
                         Properties.Settings.Default.Save();
-
-                        // Restart the Arduino communicator with the new settings
-                        ArduinoCommunicator.Setup();
                     }
                 }
             }
