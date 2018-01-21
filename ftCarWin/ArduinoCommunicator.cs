@@ -4,6 +4,7 @@ using CommandMessenger;
 using CommandMessenger.Transport;
 using CommandMessenger.Transport.Serial;
 using CommandMessenger.Transport.Bluetooth;
+using CmdMessenger.CmdComms;
 
 namespace ftCarWin {
     // List of recognized commands

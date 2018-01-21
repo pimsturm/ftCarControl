@@ -51,6 +51,7 @@ namespace CmdMessenger.CmdComms
         /// </param>
         public TcpCmdClient(string address, int port)
             : this(new TcpClient(address, port)) {
+            transportChannel = TransportChannel.Network;
             this.address = address;
             this.port = port;
         }

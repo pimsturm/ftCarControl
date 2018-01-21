@@ -10,6 +10,13 @@ namespace CmdMessenger.CmdComms
     /// </summary>
     public interface ICmdComms
     {
+        #region properties
+        /// <summary>
+        /// Gets the transport channel.
+        /// </summary>
+        TransportChannel TransportChannel { get; }
+        #endregion
+
         #region Methods
 
         /// <summary>

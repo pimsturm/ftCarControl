@@ -20,6 +20,7 @@ namespace CmdMessenger.CmdComms
         private BluetoothAddress btAddress;
 
         public BluetoothCmdClient (string address) {
+            transportChannel = TransportChannel.BlueTooth;
             btAddress = BluetoothAddress.Parse(address);
             localEndpoint = new BluetoothEndPoint(btAddress, BluetoothService.SerialPort);
             localClient = new BluetoothClient();

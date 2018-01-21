@@ -28,6 +28,7 @@ namespace CmdMessenger.CmdComms
         /// <param name="port">The port name.</param>
         /// <param name="baud">The baud rate.</param>
         public SerialCmdClient(string port, int baud) {
+            transportChannel = TransportChannel.SerialPort;
             this.serial = new SerialPort(port, baud);
         }
 

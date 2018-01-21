@@ -96,8 +96,21 @@ namespace CmdMessenger
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Gets or sets whether to print a carriage return linefeed
+        /// </summary>
+        public bool PrintCarriageReturnLineFeed { get; set; }
 
-        public bool PrintLineFeedCarrige { get; set; }
+        /// <summary>
+        /// Gets the transport channel
+        /// </summary>
+        public TransportChannel TransportChannel {
+            get {
+                if (this.client == null)
+                    return TransportChannel.Undefined;
+                return this.client.TransportChannel;
+            }
+        }
 
         #endregion
 

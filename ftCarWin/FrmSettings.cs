@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using InTheHand.Net.Sockets;
+using CmdMessenger.CmdComms;
 
 namespace ftCarWin {
 

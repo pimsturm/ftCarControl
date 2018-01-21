@@ -49,6 +49,7 @@
     <Compile Include="CmdComms\ICmdComms.cs" />
     <Compile Include="CmdComms\SerialCmdClient.cs" />
     <Compile Include="CmdComms\TcpCmdClient.cs" />
+    <Compile Include="CmdComms\TransportChannel.cs" />
     <Compile Include="CmdMessenger.cs" />
     <Compile Include="CommandObserver.cs" />
     <Compile Include="Commands\IReceivedCommand.cs" />

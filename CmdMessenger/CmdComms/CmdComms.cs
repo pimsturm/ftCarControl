@@ -25,10 +25,20 @@ namespace CmdMessenger.CmdComms
         /// </summary>
         private readonly IEscaping escaping;
 
+        internal TransportChannel transportChannel;
+
         //private Queue<byte> _buffer = new Queue<byte>();
 
         private MemoryStream buffer = new MemoryStream();
 
+        #endregion
+
+        #region Properties
+        TransportChannel ICmdComms.TransportChannel {
+            get {
+                return transportChannel;
+            }
+        }
         #endregion
 
         #region Constructors

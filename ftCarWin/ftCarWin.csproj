@@ -82,7 +82,6 @@
     <Compile Include="IDockedForm.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TransportChannel.cs" />
     <EmbeddedResource Include="FrmButtonControl.resx">
       <DependentUpon>FrmButtonControl.cs</DependentUpon>
     </EmbeddedResource>

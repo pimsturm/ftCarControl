@@ -34,25 +34,29 @@ namespace ftCarWin
         public void InitHandlers() {
             Debug.WriteLine(" Start communication.");
 
-            if (this.messenger != null) {
+            if (this.messenger != null && (int)messenger.TransportChannel != Properties.Settings.Default.TransportChannel) {
+                this.messenger.Stop();
                 this.messenger.Dispose();
+                this.messenger = null;
             }
 
-            ICmdComms client;
-            if (Properties.Settings.Default.TransportChannel == (int)TransportChannel.BlueTooth) {
-                client = new BluetoothCmdClient("30:15:01:07:11:28");
+            if (this.messenger == null) {
+                ICmdComms client;
+                if (Properties.Settings.Default.TransportChannel == (int)TransportChannel.BlueTooth) {
+                    client = new BluetoothCmdClient("30:15:01:07:11:28");
+                }
+                else {
+                    client = new SerialCmdClient("COM7", 9600);
+                }
+                this.messenger = new CmdMessenger.CmdMessenger(client);
+                this.messenger.Register((int)ArduinoCommands.Ping, r => this.messenger.Send(new PingResponse()));
+                this.messenger.Register((int)Command.kStatus, r => {
+                    this.messenger.Send(new SendCommand((int)Command.kStatus));
+                    Debug.WriteLine(" Arduino is ready");
+                });
+
+                this.messenger.Start();
             }
-            else {
-                client = new SerialCmdClient("COM7", 9600);
-            }
-            this.messenger = new CmdMessenger.CmdMessenger(client);
-            this.messenger.Register((int)ArduinoCommands.Ping, r => this.messenger.Send(new PingResponse()));
-            this.messenger.Register((int)Command.kStatus, r => {
-                this.messenger.Send(new SendCommand((int)Command.kStatus));
-                Debug.WriteLine(" Arduino is ready");
-            });
-            
-            this.messenger.Start();
 
         }
 
