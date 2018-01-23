@@ -4,7 +4,7 @@ using CmdMessenger.Commands;
 namespace ArduinoCommunicator
 {
     // List of recognized commands
-    enum Command
+    public enum Command
     {
         kLeftMotor,
         kRightMotor,

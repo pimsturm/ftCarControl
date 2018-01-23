@@ -4,7 +4,6 @@ using System.Windows.Forms;
 using System.Threading;
 using ArduinoCommunicator;
 using ArduinoCommunicator.Commands;
-using CmdMessenger;
 using CmdMessenger.CmdComms;
 using CmdMessenger.Commands;
 
