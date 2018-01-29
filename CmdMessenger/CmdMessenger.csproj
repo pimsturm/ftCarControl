@@ -59,6 +59,7 @@
     <Compile Include="Escaping.cs" />
     <Compile Include="ICommandObserver.cs" />
     <Compile Include="IEscaping.cs" />
+    <Compile Include="ILogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

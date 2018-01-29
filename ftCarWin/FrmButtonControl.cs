@@ -6,15 +6,16 @@ using ArduinoCommunicator;
 using ArduinoCommunicator.Commands;
 using CmdMessenger.CmdComms;
 using CmdMessenger.Commands;
-
+using CmdMessenger;
 
 namespace ftCarWin
 {
-    public partial class FrmButtonControl : Form, IDockedForm
+    public partial class FrmButtonControl : Form, IDockedForm, ILogger
     {
         private readonly CmdFactory factory;
         private readonly CancellationTokenSource connectCancellationToken;
         private CmdMessenger.CmdMessenger messenger;
+        private readonly SynchronizationContext synchronizationContext;
 
         private Boolean _lightOn = false;
 
@@ -32,6 +33,9 @@ namespace ftCarWin
         /// </summary>
         public void InitHandlers() {
             Debug.WriteLine(" Start communication.");
+            // Clear log
+            infoTextBox.Text = "";
+            LogMessage("Start communication.");
 
             if (this.messenger != null && (int)messenger.TransportChannel != Properties.Settings.Default.TransportChannel) {
                 this.messenger.Stop();
@@ -42,9 +46,11 @@ namespace ftCarWin
             if (this.messenger == null) {
                 ICmdComms client;
                 if (Properties.Settings.Default.TransportChannel == (int)TransportChannel.BlueTooth) {
+                    LogMessage("Create new bluetooth client");
                     client = new BluetoothCmdClient("30:15:01:07:11:28");
                 }
                 else {
+                    LogMessage("Create new serial client");
                     client = new SerialCmdClient("COM7", 9600);
                 }
                 this.messenger = new CmdMessenger.CmdMessenger(client);
@@ -52,11 +58,19 @@ namespace ftCarWin
                 this.messenger.Register((int)Command.kStatus, r => {
                     this.messenger.Send(new SendCommand((int)Command.kStatus));
                     Debug.WriteLine(" Arduino is ready");
+                    LogMessage(" Arduino is ready");
                 });
 
                 this.messenger.Start();
             }
 
+        }
+
+        /// Log a message
+        /// </summary>
+        /// <param name="message">The message</param>
+        public void LogMessage (string message) {
+            infoTextBox.Text += message + Environment.NewLine;
         }
 
         private void btnLight_Click(object sender, EventArgs e)
