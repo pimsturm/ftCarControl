@@ -53,14 +53,13 @@ namespace ftCarWin
                     LogMessage("Create new serial client");
                     client = new SerialCmdClient("COM7", 9600);
                 }
-                this.messenger = new CmdMessenger.CmdMessenger(client);
+                this.messenger = new CmdMessenger.CmdMessenger(client, this);
                 this.messenger.Register((int)ArduinoCommands.Ping, r => this.messenger.Send(new PingResponse()));
                 this.messenger.Register((int)Command.kStatus, r => {
                     this.messenger.Send(new SendCommand((int)Command.kStatus));
                     Debug.WriteLine(" Arduino is ready");
                     LogMessage(" Arduino is ready");
                 });
-
                 this.messenger.Start();
             }
 

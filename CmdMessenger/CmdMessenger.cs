@@ -58,6 +58,7 @@ namespace CmdMessenger
         private readonly CancellationTokenSource cancellationTokenSource;
         private readonly Dictionary<int, CommandWarper> inflightCommands = new Dictionary<int, CommandWarper>();
         private bool disposed;
+        private ILogger logger;
 
         #endregion
 
@@ -66,31 +67,30 @@ namespace CmdMessenger
         /// <summary> 
         /// Initializes a new instance of the <see cref="CmdMessenger"/> class. 
         /// </summary>
-        /// <param name="client">
-        /// The command client.
-        /// </param>
-        public CmdMessenger(ICmdComms client)
-            : this(client, Escaping.Default) {
+        /// <param name="client">The command client.</param>
+        /// <param name="escaping">The escaping instance.</param>
+        public CmdMessenger(ICmdComms client, ILogger logger)
+            : this(client, logger, Escaping.Default) {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmdMessenger"/> class. 
         /// </summary>
-        /// <param name="client">
-        /// The command client.
-        /// </param>
-        /// <param name="escaping">
-        /// The escaping instance.
-        /// </param>
-        public CmdMessenger(ICmdComms client, IEscaping escaping) {
+        /// <param name="client">The command client.</param>
+        /// <param name="logger">Logger object for logging process messages</param>
+        public CmdMessenger(ICmdComms client, ILogger logger, IEscaping escaping) {
             if (client == null) {
                 throw new ArgumentNullException("client");
+            }
+            if (logger == null) {
+                throw new ArgumentNullException("logger");
             }
 
             this.commandHandlers = new Dictionary<int, List<ICommandObserver>>();
             this.commandTimeOut = new Timer(this.ProcessTimedOutCommands);
             this.cancellationTokenSource = new CancellationTokenSource();
             this.client = client;
+            this.logger = logger;
         }
 
         #endregion
@@ -122,6 +122,7 @@ namespace CmdMessenger
         public async void Start() {
             this.commandTimeOut.Change(500, 500);
             await this.client.OpenAsync();
+            logger.LogMessage("Connection opened");
             this.ProcessCommands();
         }
 
@@ -130,6 +131,7 @@ namespace CmdMessenger
                 try {
                     IReceivedCommand command = await this.client.ReadAsync(this.cancellationTokenSource.Token);
                     Debug.WriteLine("Received: "+ command.CommandId.ToString());
+                    logger.LogMessage("Received: " + command.CommandId.ToString());
                     if (this.inflightCommands.ContainsKey(command.CommandId)) {
                         this.inflightCommands[command.CommandId].TrySetResult(command);
                     }
@@ -158,8 +160,12 @@ namespace CmdMessenger
         /// <param name="command">The command to send.</param>
         /// <returns>The commands response.</returns>
         public IReceivedCommand Send(ISendCommand command) {
+            logger.LogMessage("Send: " + command.CommandId.ToString());
             Task<IReceivedCommand> t = this.SendAsync(command);
             try {
+                if (t.Result != null) {
+                    logger.LogMessage("Received: " + t.Result.CommandId.ToString());
+                }
                 return t.Result;
             }
             catch (AggregateException ex) {
@@ -170,16 +176,16 @@ namespace CmdMessenger
         /// <summary>
         /// Send a command asynchronously.
         /// </summary>
-        /// <param name="commad">The command to send.</param>
+        /// <param name="command">The command to send.</param>
         /// <returns>A task completion source for the command.</returns>
-        public Task<IReceivedCommand> SendAsync(ISendCommand commad) {
+        public Task<IReceivedCommand> SendAsync(ISendCommand command) {
             var tcs = new CommandWarper();
-            if (commad.AckCommandId.HasValue) {
-                if (this.inflightCommands.ContainsKey(commad.AckCommandId.Value)) {
-                    this.inflightCommands[commad.AckCommandId.Value] = tcs;
+            if (command.AckCommandId.HasValue) {
+                if (this.inflightCommands.ContainsKey(command.AckCommandId.Value)) {
+                    this.inflightCommands[command.AckCommandId.Value] = tcs;
                 }
                 else {
-                    this.inflightCommands.Add(commad.AckCommandId.Value, tcs);
+                    this.inflightCommands.Add(command.AckCommandId.Value, tcs);
                 }
             }
             else {
@@ -187,7 +193,7 @@ namespace CmdMessenger
             }
 
             try {
-                this.client.Send(commad);
+                this.client.Send(command);
             }
             catch (Exception ex) {
                 tcs.Task.TrySetException(ex);
