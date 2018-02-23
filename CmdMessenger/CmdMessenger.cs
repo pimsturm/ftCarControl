@@ -127,6 +127,9 @@ namespace CmdMessenger
         }
 
         private async void ProcessCommands() {
+            logger.LogMessage("Processing commands");
+            if (this.cancellationTokenSource.IsCancellationRequested)
+                logger.LogMessage("Cancellation");
             while (!this.cancellationTokenSource.IsCancellationRequested) {
                 try {
                     IReceivedCommand command = await this.client.ReadAsync(this.cancellationTokenSource.Token);
@@ -150,6 +153,7 @@ namespace CmdMessenger
         /// Close the connection.
         /// </summary>
         public void Stop() {
+            logger.LogMessage("Stop");
             this.cancellationTokenSource.Cancel();
             this.client.Close();
         }

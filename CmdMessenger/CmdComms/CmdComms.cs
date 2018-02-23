@@ -39,6 +39,8 @@ namespace CmdMessenger.CmdComms
                 return transportChannel;
             }
         }
+
+        public ILogger Logger { get; set; }
         #endregion
 
         #region Constructors
@@ -116,38 +118,51 @@ namespace CmdMessenger.CmdComms
         }
 
         private async void ReadAsync(TaskCompletionSource<IReceivedCommand> tcs, CancellationToken token) {
+            if (Logger != null)
+                Logger.LogMessage("ReadAsync");
             if (!token.IsCancellationRequested) {
                 try {
-
+                    int packetSize = 5000;
                     Stream stream = this.GetStream();
-                    var buffer = new byte[5000];
+                    var buffer = new byte[packetSize];
 
-                    int task = await stream.ReadAsync(buffer, 0, 5000, token);
+                    using (this.buffer) {
+                        int count = 1;
+                        int bytesReceived = 0;
+                        bool continueReading = true;
 
-                    //var result = this.escaping.GetCommand(buffer).FirstOrDefault();
+                        // Read Data
+                        while (continueReading) {
+                            if ((count = await stream.ReadAsync(buffer, 0, packetSize - bytesReceived > buffer.Length ? buffer.Length : packetSize - bytesReceived)) > 0) {
+                                // Save Data
+                                this.buffer.Write(buffer, 0, count);
 
-                    //if (result != null)
-                    //{
-                    //    tcs.SetResult(ReceivedCommand.Create(this.escaping.GetUnescapedParameters(result)));
-                    //}
+                                // Count
+                                bytesReceived += count;
 
-                    if (task > 0) {
-                        //for (int b = 0; b < task; b++)
-                        //{
-                        //    _buffer.Enqueue(buffer[b]);
-                        //}
+                                // Check if a full command is read
+                                var position = this.buffer.Position;
+                                this.buffer.Position -= bytesReceived;
+                                var command = this.escaping.GetCommand(this.buffer).FirstOrDefault();
+                                if (command != null) {
+                                    continueReading = false;
+                                }
 
-                        this.buffer.Write(buffer, 0, task);
+                                // Restore buffer position
+                                this.buffer.Position = position;
 
-                        this.buffer.Position -= task;
+                            }
+                        }
 
-
+                        this.buffer.Position -= bytesReceived;
                         var result = this.escaping.GetCommand(this.buffer).FirstOrDefault();
-
                         if (result != null) {
+                            if (Logger != null)
+                                Logger.LogMessage("Result: " + Encoding.Default.GetString(result));
                             tcs.SetResult(ReceivedCommand.Create(this.escaping.GetUnescapedParameters(result)));
                         }
                     }
+
                 }
                 catch (ObjectDisposedException) {
                     tcs.TrySetCanceled();

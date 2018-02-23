@@ -15,6 +15,11 @@ namespace CmdMessenger.CmdComms
         /// Gets the transport channel.
         /// </summary>
         TransportChannel TransportChannel { get; }
+
+        /// <summary>
+        /// Gets or sets the logger object
+        /// </summary>
+        ILogger Logger { get; set; }
         #endregion
 
         #region Methods
