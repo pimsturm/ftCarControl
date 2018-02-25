@@ -12,10 +12,10 @@ namespace ftCarWin
 {
     public partial class FrmButtonControl : Form, IDockedForm, ILogger
     {
+        public static ListBoxLog listBoxLog;
         private readonly CmdFactory factory;
         private readonly CancellationTokenSource connectCancellationToken;
         private CmdMessenger.CmdMessenger messenger;
-        private readonly SynchronizationContext synchronizationContext;
 
         private Boolean _lightOn = false;
 
@@ -33,8 +33,9 @@ namespace ftCarWin
         /// </summary>
         public void InitHandlers() {
             Debug.WriteLine(" Start communication.");
-            // Clear log
-            infoTextBox.Text = "";
+            
+            if (listBoxLog == null)
+                listBoxLog = new ListBoxLog(logListBox);
             LogMessage("Start communication.");
 
             if (this.messenger != null && (int)messenger.TransportChannel != Properties.Settings.Default.TransportChannel) {
@@ -70,7 +71,7 @@ namespace ftCarWin
         /// </summary>
         /// <param name="message">The message</param>
         public void LogMessage (string message) {
-            infoTextBox.Text += message + Environment.NewLine;
+            listBoxLog.Log(Level.Info, message);
         }
 
         private void btnLight_Click(object sender, EventArgs e)

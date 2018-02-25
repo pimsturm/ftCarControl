@@ -70,6 +70,7 @@
       <DependentUpon>FrmSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="IDockedForm.cs" />
+    <Compile Include="ListBoxLog.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="FrmButtonControl.resx">
