@@ -52,9 +52,49 @@ namespace CmdMessenger.CmdComms
         }
 
         /// <summary>
+        /// Checks if the communication port is open
+        /// </summary>
+        /// <returns>True if the port is open</returns>
+        public sealed override bool IsOpen() {
+            return this.serial.IsOpen;
+        }
+
+        /// <summary>
+        /// Find the COM port to which the Arduino is connected
+        /// </summary>
+        /// <returns>The COM port</returns>
+        public SerialPort FindComPort() {
+            SerialPort serialPort;
+
+            try {
+                string[] ports = SerialPort.GetPortNames();
+                foreach (string port in ports) {
+                    serialPort = new SerialPort(port, 9600);
+                    if (DetectArduino(serialPort)) {
+                        return serialPort;
+                    }
+                    else {
+                        serialPort = null;
+                    }
+                }
+            }
+            catch (Exception e) {
+            }
+            return null;
+        }
+
+        private bool DetectArduino(SerialPort port) {
+            bool found = false;
+
+            return found;
+        }
+
+        /// <summary>
         /// The close.
         /// </summary>
         public sealed override void Close() {
+            if (Logger != null)
+                Logger.LogMessage("Close serial port");
             this.serial.Close();
         }
 
@@ -69,6 +109,8 @@ namespace CmdMessenger.CmdComms
         }
 
         public void Dispose() {
+            if (Logger != null)
+                Logger.LogMessage("Dispose serial client");
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -76,6 +118,8 @@ namespace CmdMessenger.CmdComms
         protected virtual void Dispose(bool disposing) {
             if (!this.disposed) {
                 if (disposing) {
+                    if (Logger != null)
+                        Logger.LogMessage("Dispose serial port");
                     this.serial.Dispose();
                 }
 

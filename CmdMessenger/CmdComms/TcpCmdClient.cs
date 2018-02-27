@@ -79,6 +79,10 @@ namespace CmdMessenger.CmdComms
             return this.WaitForConnection();
         }
 
+        public sealed override bool IsOpen() {
+            throw new NotImplementedException();
+        }
+
         private Task WaitForConnection() {
             var tcp = new TaskCompletionSource<bool>();
 

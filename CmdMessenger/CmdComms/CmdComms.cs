@@ -27,10 +27,6 @@ namespace CmdMessenger.CmdComms
 
         internal TransportChannel transportChannel;
 
-        //private Queue<byte> _buffer = new Queue<byte>();
-
-        private MemoryStream buffer = new MemoryStream();
-
         #endregion
 
         #region Properties
@@ -75,45 +71,60 @@ namespace CmdMessenger.CmdComms
         public abstract Task OpenAsync();
 
         /// <summary>
-        /// The close.
+        /// Close the communication port.
         /// </summary>
         public abstract void Close();
 
         /// <summary>
+        /// Checks if the communication port is open
+        /// </summary>
+        /// <returns>True if the port is open</returns>
+        public abstract bool IsOpen();
+
+        /// <summary>
         /// Writes a parameter to the serial port.
         /// </summary>
-        /// <param name="command">
-        /// The command to send.
-        /// </param>
+        /// <param name="command">The command to send.</param>
         public void Send(ISendCommand command) {
-            this.SendAsync(command).Wait();
+            SendAsync(command).Wait();
         }
 
+        /// <summary>
+        /// Writes async to the serial port.
+        /// </summary>
+        /// <param name="command">The command to send.</param>
+        /// <returns>The completed task.</returns>
         public Task SendAsync(ISendCommand command) {
-            byte[] bytes = this.encoder.GetBytes(command.GetCommand());
+            byte[] bytes = encoder.GetBytes(command.GetCommand());
             var tcs = new TaskCompletionSource<bool>();
             try {
-                Stream stream = this.GetStream();
+                Stream stream = GetStream();
                 stream.WriteAsync(bytes, 0, bytes.Length).Wait();
                 tcs.SetResult(true);
             }
             catch (Exception ex) {
-                //if (ex.SocketErrorCode == SocketError.ConnectionAborted)
-                //{
-                //    tcs.TrySetCanceled();
-                //}
                 tcs.TrySetException(ex);
             }
             return tcs.Task;
         }
 
+        /// <summary>
+        /// Reads from the serial port
+        /// </summary>
+        /// <param name="token">Token for monitoring the cancellation status</param>
+        /// <returns>The result of the completed read.</returns>
         public IReceivedCommand Read(CancellationToken token) {
-            return this.ReadAsync(token).Result;
+            return ReadAsync(token).Result;
         }
 
+        /// <summary>
+        /// Reads async from the serial port
+        /// </summary>
+        /// <param name="token">Token for monitoring the cancellation status</param>
+        /// <returns>The result of the async task.</returns>
         public Task<IReceivedCommand> ReadAsync(CancellationToken token) {
             var tcs = new TaskCompletionSource<IReceivedCommand>();
-            this.ReadAsync(tcs, token);
+            ReadAsync(tcs, token);
             return tcs.Task;
         }
 
@@ -123,54 +134,65 @@ namespace CmdMessenger.CmdComms
             if (!token.IsCancellationRequested) {
                 try {
                     int packetSize = 5000;
-                    Stream stream = this.GetStream();
+                    Stream stream = GetStream();
                     var buffer = new byte[packetSize];
+                    var ms = new MemoryStream();
+                    byte[] result = null;
 
-                    using (this.buffer) {
+                    using (ms) {
                         int count = 1;
                         int bytesReceived = 0;
                         bool continueReading = true;
 
                         // Read Data
                         while (continueReading) {
-                            if ((count = await stream.ReadAsync(buffer, 0, packetSize - bytesReceived > buffer.Length ? buffer.Length : packetSize - bytesReceived)) > 0) {
+                            continueReading = (count = await stream.ReadAsync(buffer, 0, packetSize - bytesReceived > buffer.Length ? buffer.Length : packetSize - bytesReceived)) > 0;
+                            if (continueReading) {
                                 // Save Data
-                                this.buffer.Write(buffer, 0, count);
+                                ms.Write(buffer, 0, count);
 
                                 // Count
                                 bytesReceived += count;
 
                                 // Check if a full command is read
-                                var position = this.buffer.Position;
-                                this.buffer.Position -= bytesReceived;
-                                var command = this.escaping.GetCommand(this.buffer).FirstOrDefault();
-                                if (command != null) {
-                                    continueReading = false;
-                                }
-
-                                // Restore buffer position
-                                this.buffer.Position = position;
-
+                                continueReading = !IsCommandComplete(ms, bytesReceived, out result);
                             }
                         }
 
-                        this.buffer.Position -= bytesReceived;
-                        var result = this.escaping.GetCommand(this.buffer).FirstOrDefault();
                         if (result != null) {
                             if (Logger != null)
                                 Logger.LogMessage("Result: " + Encoding.Default.GetString(result));
-                            tcs.SetResult(ReceivedCommand.Create(this.escaping.GetUnescapedParameters(result)));
+                            tcs.SetResult(ReceivedCommand.Create(escaping.GetUnescapedParameters(result)));
                         }
                     }
 
                 }
-                catch (ObjectDisposedException) {
+                catch (ObjectDisposedException e) {
+                    if (Logger != null)
+                        Logger.LogMessage("ReadAsync: ObjectDisposedException " + e.Message);
                     tcs.TrySetCanceled();
                 }
                 catch (Exception) {
+                    if (Logger != null)
+                        Logger.LogMessage("ReadAsync: Exception");
                     tcs.TrySetCanceled();
                 }
             }
+        }
+
+        private bool IsCommandComplete(MemoryStream ms, int bytesReceived, out byte[] result) {
+            bool isComplete = false;
+
+            var position = ms.Position;
+            ms.Position -= bytesReceived;
+            result = escaping.GetCommand(ms).FirstOrDefault();
+            isComplete = result != null;
+            if (!isComplete) {
+                // Restore buffer position
+                ms.Position = position;
+            }
+
+            return isComplete;
         }
 
         protected abstract Stream GetStream();

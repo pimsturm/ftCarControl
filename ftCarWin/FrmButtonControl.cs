@@ -56,7 +56,6 @@ namespace ftCarWin
                 }
                 client.Logger = this;
                 this.messenger = new CmdMessenger.CmdMessenger(client, this);
-                this.messenger.Register((int)ArduinoCommands.Ping, r => this.messenger.Send(new PingResponse()));
                 this.messenger.Register((int)Command.kStatus, r => {
                     this.messenger.Send(new SendCommand((int)Command.kStatus));
                     Debug.WriteLine(" Arduino is ready");
@@ -74,7 +73,7 @@ namespace ftCarWin
             listBoxLog.Log(Level.Info, message);
         }
 
-        private void btnLight_Click(object sender, EventArgs e)
+        private void LightButtonClick(object sender, EventArgs e)
         {
             _lightOn = !_lightOn;
             if (_lightOn)
@@ -89,30 +88,33 @@ namespace ftCarWin
             }
         }
 
-        private void btnForward_Click(object sender, EventArgs e) {
+        private void ForwardButtonClick(object sender, EventArgs e) {
             this.messenger.Send(this.factory.CreateCommandLeftMotorForward());
             this.messenger.Send(this.factory.CreateCommandRightMotorForward());
         }
 
-        private void btnBackward_Click(object sender, EventArgs e) {
+        private void BackwardButtonClick(object sender, EventArgs e) {
             this.messenger.Send(this.factory.CreateCommandLeftMotorBackward());
             this.messenger.Send(this.factory.CreateCommandRightMotorBackward());
         }
 
-        private void btnLeft_Click(object sender, EventArgs e) {
+        private void LeftButtonClick(object sender, EventArgs e) {
             this.messenger.Send(this.factory.CreateCommandLeftMotorBackward());
             this.messenger.Send(this.factory.CreateCommandRightMotorForward());
         }
 
-        private void btnRight_Click(object sender, EventArgs e) {
+        private void RightButtonClick(object sender, EventArgs e) {
             this.messenger.Send(this.factory.CreateCommandLeftMotorForward());
             this.messenger.Send(this.factory.CreateCommandRightMotorBackward());
         }
 
-        private void btnStop_Click(object sender, EventArgs e) {
+        private void StopButtonClick(object sender, EventArgs e) {
             this.messenger.Send(this.factory.CreateCommandStopMotors());
         }
 
+        private void IdentifyButtonClick(object sender, EventArgs e) {
+            messenger.Send(factory.CreatePingCommand());
+        }
 
-    }
+        }
 }

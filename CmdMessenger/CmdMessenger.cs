@@ -55,7 +55,7 @@ namespace CmdMessenger
         private readonly ICmdComms client;
         private readonly Dictionary<int, List<ICommandObserver>> commandHandlers;
         private readonly Timer commandTimeOut;
-        private readonly CancellationTokenSource cancellationTokenSource;
+        private CancellationTokenSource cancellationTokenSource;
         private readonly Dictionary<int, CommandWarper> inflightCommands = new Dictionary<int, CommandWarper>();
         private bool disposed;
         private ILogger logger;
@@ -112,6 +112,10 @@ namespace CmdMessenger
             }
         }
 
+        /// <summary>
+        /// Gets or sets the command to check if the Arduino is alive
+        /// </summary>
+        public ISendCommand PingCommand { get; set; }
         #endregion
 
         #region Methods
@@ -121,9 +125,14 @@ namespace CmdMessenger
         /// </summary>
         public async void Start() {
             this.commandTimeOut.Change(500, 500);
-            await this.client.OpenAsync();
+            try {
+                await client.OpenAsync();
+            }
+            catch (UnauthorizedAccessException e) {
+                logger.LogMessage("Unauthorized:" + e.Message);
+            }
             logger.LogMessage("Connection opened");
-            this.ProcessCommands();
+            ProcessCommands();
         }
 
         private async void ProcessCommands() {
@@ -145,6 +154,7 @@ namespace CmdMessenger
                     }
                 }
                 catch (TaskCanceledException) {
+                    logger.LogMessage("TaskCanceledException");
                 }
             }
         }
@@ -156,6 +166,15 @@ namespace CmdMessenger
             logger.LogMessage("Stop");
             this.cancellationTokenSource.Cancel();
             this.client.Close();
+        }
+
+        public void Cancel() {
+            cancellationTokenSource.Cancel();
+        }
+
+        public void Resume() {
+            cancellationTokenSource = new CancellationTokenSource();
+            ProcessCommands();
         }
 
         /// <summary>

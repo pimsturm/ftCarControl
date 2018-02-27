@@ -46,7 +46,6 @@
     <Compile Include="Commands\GetMotorSpeed.cs" />
     <Compile Include="Commands\GetMotorSpeedResponse.cs" />
     <Compile Include="Commands\Ping.cs" />
-    <Compile Include="Commands\PingResponse.cs" />
     <Compile Include="Commands\SendMotorSpeed.cs" />
     <Compile Include="Commands\SetMotorSpeed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

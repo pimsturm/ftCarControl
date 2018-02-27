@@ -44,6 +44,14 @@ namespace CmdMessenger.CmdComms
         }
 
         /// <summary>
+        /// Checks if the communication port is open
+        /// </summary>
+        /// <returns>True if the port is open</returns>
+        public sealed override bool IsOpen() {
+            return localClient.Connected;
+        }
+
+        /// <summary>
         /// The close.
         /// </summary>
         public sealed override void Close() {

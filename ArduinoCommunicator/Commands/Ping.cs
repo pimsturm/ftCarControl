@@ -7,13 +7,15 @@ namespace ArduinoCommunicator.Commands
     /// </summary>
     public class Ping : SendCommand
     {
+        private const string arduinoId = "BFAF4176-766E-436A-ADF2-96133C02B03C";
+
         #region Constructors and Destructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Ping" /> class.
         /// </summary>
         public Ping()
-            : base((int)ArduinoCommands.Ping, (int)ArduinoCommands.PingResponse) {
+            : base((int)Command.kIdentify) {
         }
 
         #endregion

@@ -36,6 +36,10 @@ namespace ArduinoCommunicator
             return null;
         }
 
+        public Ping CreatePingCommand() {
+            return new Ping();
+        }
+
         /// <summary>
         /// Creates a command to make the right motor move forward
         /// </summary>
