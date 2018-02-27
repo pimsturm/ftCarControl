@@ -143,12 +143,14 @@ namespace CmdMessenger
                 try {
                     IReceivedCommand command = await this.client.ReadAsync(this.cancellationTokenSource.Token);
                     Debug.WriteLine("Received: "+ command.CommandId.ToString());
-                    logger.LogMessage("Received: " + command.CommandId.ToString());
+                    logger.LogMessage("Received (ProcessCommands): " + command.CommandId.ToString());
                     if (this.inflightCommands.ContainsKey(command.CommandId)) {
+                        logger.LogMessage("Inflight command");
                         this.inflightCommands[command.CommandId].TrySetResult(command);
                     }
 
                     if (this.commandHandlers.ContainsKey(command.CommandId)) {
+                        logger.LogMessage("Command handler");
                         var handler = this.commandHandlers[command.CommandId];
                         handler.ForEach(c => c.Update(command));
                     }
@@ -187,7 +189,7 @@ namespace CmdMessenger
             Task<IReceivedCommand> t = this.SendAsync(command);
             try {
                 if (t.Result != null) {
-                    logger.LogMessage("Received: " + t.Result.CommandId.ToString());
+                    logger.LogMessage("Received (Send): " + t.Result.CommandId.ToString());
                 }
                 return t.Result;
             }

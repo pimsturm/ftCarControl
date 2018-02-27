@@ -56,10 +56,10 @@ namespace ftCarWin
                 }
                 client.Logger = this;
                 this.messenger = new CmdMessenger.CmdMessenger(client, this);
-                this.messenger.Register((int)Command.kStatus, r => {
-                    this.messenger.Send(new SendCommand((int)Command.kStatus));
+                this.messenger.Register((int)Command.kIdentify, r => {
                     Debug.WriteLine(" Arduino is ready");
-                    LogMessage(" Arduino is ready");
+                    LogMessage(" Arduino is ready " + r.CommandId.ToString());
+                    LogMessage(" Arduino ID " + r.ReadString());
                 });
                 this.messenger.Start();
             }
