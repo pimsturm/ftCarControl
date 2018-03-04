@@ -10,8 +10,8 @@ namespace CmdMessenger.Test.CmdCommsTest
 
         #region Constructor
 
-        public MockClient() {
-            this.stream = new MemoryStream();
+        public MockClient() : base(new MockLogger()) {
+            stream = new MemoryStream();
         }
 
         #endregion
@@ -19,7 +19,7 @@ namespace CmdMessenger.Test.CmdCommsTest
         #region Properties
 
         public Stream Stream {
-            get { return this.stream; }
+            get { return stream; }
         }
 
         #endregion
@@ -27,11 +27,11 @@ namespace CmdMessenger.Test.CmdCommsTest
         #region Methods
 
         public string StreamString() {
-            return Encoding.ASCII.GetString(this.stream.ToArray());
+            return Encoding.ASCII.GetString(stream.ToArray());
         }
 
         protected override Stream GetStream() {
-            return this.stream;
+            return stream;
         }
 
         public override Task OpenAsync() {
@@ -40,11 +40,15 @@ namespace CmdMessenger.Test.CmdCommsTest
             return tcs.Task;
         }
 
+        public override bool IsOpen() {
+            return true;
+        }
+
         /// <summary>
         /// Disconnect from the device.
         /// </summary>
         public override void Close() {
-            this.stream.Close();
+            stream.Close();
         }
 
         /// <summary>

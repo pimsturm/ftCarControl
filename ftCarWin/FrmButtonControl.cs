@@ -3,9 +3,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.Threading;
 using ArduinoCommunicator;
-using ArduinoCommunicator.Commands;
 using CmdMessenger.CmdComms;
-using CmdMessenger.Commands;
 using CmdMessenger;
 
 namespace ftCarWin
@@ -23,9 +21,9 @@ namespace ftCarWin
         {
             InitializeComponent();
 
-            this.connectCancellationToken = new CancellationTokenSource();
+            connectCancellationToken = new CancellationTokenSource();
 
-            this.factory = new CmdFactory();
+            factory = new CmdFactory();
         }
 
         /// <summary>
@@ -38,30 +36,32 @@ namespace ftCarWin
                 listBoxLog = new ListBoxLog(logListBox);
             LogMessage("Start communication.");
 
-            if (this.messenger != null && (int)messenger.TransportChannel != Properties.Settings.Default.TransportChannel) {
-                this.messenger.Stop();
-                this.messenger.Dispose();
-                this.messenger = null;
+            if (messenger != null && (int)messenger.TransportChannel != Properties.Settings.Default.TransportChannel) {
+                messenger.Stop();
+                messenger.Dispose();
+                messenger = null;
             }
 
-            if (this.messenger == null) {
+            if (messenger == null) {
                 ICmdComms client;
                 if (Properties.Settings.Default.TransportChannel == (int)TransportChannel.BlueTooth) {
                     LogMessage("Create new bluetooth client");
-                    client = new BluetoothCmdClient("30:15:01:07:11:28");
+                    client = new BluetoothCmdClient("30:15:01:07:11:28", this);
                 }
                 else {
                     LogMessage("Create new serial client");
-                    client = new SerialCmdClient("COM7", 9600);
+                    client = new SerialCmdClient("COM7", 9600, this);
+                    //client = null;
                 }
-                client.Logger = this;
-                this.messenger = new CmdMessenger.CmdMessenger(client, this);
-                this.messenger.Register((int)Command.kIdentify, r => {
-                    Debug.WriteLine(" Arduino is ready");
+                messenger = new CmdMessenger.CmdMessenger(client, this)
+                {
+                    PingCommand = factory.CreatePingCommand()
+                };
+                messenger.Register((int)Command.kIdentify, r => {
                     LogMessage(" Arduino is ready " + r.CommandId.ToString());
                     LogMessage(" Arduino ID " + r.ReadString());
                 });
-                this.messenger.Start();
+                messenger.Start();
             }
 
         }
@@ -79,37 +79,37 @@ namespace ftCarWin
             if (_lightOn)
             {
                 btnLight.Text = "Off";
-                this.messenger.Send(this.factory.CreateCommandLightOn());
+                messenger.Send(factory.CreateCommandLightOn());
             }
             else
             {
                 btnLight.Text = "On";
-                this.messenger.Send(this.factory.CreateCommandLightOff());
+                messenger.Send(factory.CreateCommandLightOff());
             }
         }
 
         private void ForwardButtonClick(object sender, EventArgs e) {
-            this.messenger.Send(this.factory.CreateCommandLeftMotorForward());
-            this.messenger.Send(this.factory.CreateCommandRightMotorForward());
+            messenger.Send(factory.CreateCommandLeftMotorForward());
+            messenger.Send(factory.CreateCommandRightMotorForward());
         }
 
         private void BackwardButtonClick(object sender, EventArgs e) {
-            this.messenger.Send(this.factory.CreateCommandLeftMotorBackward());
-            this.messenger.Send(this.factory.CreateCommandRightMotorBackward());
+            messenger.Send(factory.CreateCommandLeftMotorBackward());
+            messenger.Send(factory.CreateCommandRightMotorBackward());
         }
 
         private void LeftButtonClick(object sender, EventArgs e) {
-            this.messenger.Send(this.factory.CreateCommandLeftMotorBackward());
-            this.messenger.Send(this.factory.CreateCommandRightMotorForward());
+            messenger.Send(factory.CreateCommandLeftMotorBackward());
+            messenger.Send(factory.CreateCommandRightMotorForward());
         }
 
         private void RightButtonClick(object sender, EventArgs e) {
-            this.messenger.Send(this.factory.CreateCommandLeftMotorForward());
-            this.messenger.Send(this.factory.CreateCommandRightMotorBackward());
+            messenger.Send(factory.CreateCommandLeftMotorForward());
+            messenger.Send(factory.CreateCommandRightMotorBackward());
         }
 
         private void StopButtonClick(object sender, EventArgs e) {
-            this.messenger.Send(this.factory.CreateCommandStopMotors());
+            messenger.Send(factory.CreateCommandStopMotors());
         }
 
         private void IdentifyButtonClick(object sender, EventArgs e) {

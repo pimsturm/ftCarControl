@@ -46,7 +46,8 @@ namespace CmdMessenger.Test
             var cmdServer = new MockCmdServer();
             Task.Factory.StartNew(cmdServer.Start);
 
-            var cmdClient = new CmdMessenger(new TcpCmdClient("127.0.0.1", 5000), new MockLogger());
+            var logger = new MockLogger();
+            var cmdClient = new CmdMessenger(new TcpCmdClient("127.0.0.1", 5000, logger), logger);
             cmdClient.Start();
             IReceivedCommand command = cmdClient.Send(new SendCommand(5, 6));
 

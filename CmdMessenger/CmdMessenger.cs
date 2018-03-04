@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using System.IO.Ports;
 using CmdMessenger.Commands;
 using CmdMessenger.CmdComms;
 
@@ -30,11 +31,11 @@ namespace CmdMessenger
             #region Properties
 
             public DateTime TimeSent {
-                get { return this.timeSent; }
+                get { return timeSent; }
             }
 
             public TaskCompletionSource<IReceivedCommand> Task {
-                get { return this.task; }
+                get { return task; }
             }
 
             #endregion
@@ -49,10 +50,8 @@ namespace CmdMessenger
             }
         }
 
-        #region Fields
-
         private const int CommandTimeOutDueTime = 1000;
-        private readonly ICmdComms client;
+        private ICmdComms client;
         private readonly Dictionary<int, List<ICommandObserver>> commandHandlers;
         private readonly Timer commandTimeOut;
         private CancellationTokenSource cancellationTokenSource;
@@ -60,15 +59,11 @@ namespace CmdMessenger
         private bool disposed;
         private ILogger logger;
 
-        #endregion
-
-        #region Constructor
-
         /// <summary> 
         /// Initializes a new instance of the <see cref="CmdMessenger"/> class. 
         /// </summary>
         /// <param name="client">The command client.</param>
-        /// <param name="escaping">The escaping instance.</param>
+        /// <param name="logger">Logger object for logging process messages</param>
         public CmdMessenger(ICmdComms client, ILogger logger)
             : this(client, logger, Escaping.Default) {
         }
@@ -78,24 +73,15 @@ namespace CmdMessenger
         /// </summary>
         /// <param name="client">The command client.</param>
         /// <param name="logger">Logger object for logging process messages</param>
+        /// <param name="escaping">The escaping instance.</param>
         public CmdMessenger(ICmdComms client, ILogger logger, IEscaping escaping) {
-            if (client == null) {
-                throw new ArgumentNullException("client");
-            }
-            if (logger == null) {
-                throw new ArgumentNullException("logger");
-            }
-
-            this.commandHandlers = new Dictionary<int, List<ICommandObserver>>();
-            this.commandTimeOut = new Timer(this.ProcessTimedOutCommands);
-            this.cancellationTokenSource = new CancellationTokenSource();
+            commandHandlers = new Dictionary<int, List<ICommandObserver>>();
+            commandTimeOut = new Timer(ProcessTimedOutCommands);
+            cancellationTokenSource = new CancellationTokenSource();
             this.client = client;
-            this.logger = logger;
+            this.logger = logger ?? throw new ArgumentNullException("logger");
         }
 
-        #endregion
-
-        #region Properties
         /// <summary>
         /// Gets or sets whether to print a carriage return linefeed
         /// </summary>
@@ -106,9 +92,9 @@ namespace CmdMessenger
         /// </summary>
         public TransportChannel TransportChannel {
             get {
-                if (this.client == null)
+                if (client == null)
                     return TransportChannel.Undefined;
-                return this.client.TransportChannel;
+                return client.TransportChannel;
             }
         }
 
@@ -116,42 +102,86 @@ namespace CmdMessenger
         /// Gets or sets the command to check if the Arduino is alive
         /// </summary>
         public ISendCommand PingCommand { get; set; }
-        #endregion
-
-        #region Methods
 
         /// <summary>
-        /// Open the connection.
+        /// Find the COM port to which the Arduino is connected
+        /// </summary>
+        public async Task<bool> FindComPort() {
+            var tcs = new TaskCompletionSource<bool>();
+            await Task.Factory.StartNew(async () => {
+                try {
+                    string[] ports = SerialPort.GetPortNames();
+                    foreach (string port in ports) {
+                        client = new SerialCmdClient(port, 9600, logger);
+                        logger.LogMessage("Trying serial port: " + port);
+                        await client.OpenAsync();
+                        if (await DetectArduino()) {
+                            logger.LogMessage("Arduino is connected to serial port: " + port);
+                            break;
+                        }
+                        else {
+                            Stop();
+                            client = null;
+                        }
+                    }
+                }
+                catch (Exception e) {
+                    logger.LogMessage("Exception while detecting serial port: " + e.Message);
+                }
+                tcs.SetResult(true);
+            });
+            return await tcs.Task;
+        }
+
+        private async Task<bool> DetectArduino() {
+            bool found = false;
+            IReceivedCommand result = Send(PingCommand);
+            try {
+                IReceivedCommand command = await client.ReadAsync(cancellationTokenSource.Token);
+                found = (command.ReadString() == "BFAF4176-766E-436A-ADF2-96133C02B03C");
+
+            }
+            catch (Exception e) {
+                logger.LogMessage("Exception while reading serial port: " + e.Message);
+            }
+            
+            return found;
+        }
+
+        /// <summary>
+        /// Open the connection and start receiving commands
         /// </summary>
         public async void Start() {
-            this.commandTimeOut.Change(500, 500);
-            try {
-                await client.OpenAsync();
-            }
-            catch (UnauthorizedAccessException e) {
-                logger.LogMessage("Unauthorized:" + e.Message);
-            }
+            commandTimeOut.Change(500, 500);
+
+            if (client == null)
+                await FindComPort();
+
+            if (client == null)
+                return;
+
+            await client.OpenAsync();
             logger.LogMessage("Connection opened");
             ProcessCommands();
         }
 
         private async void ProcessCommands() {
             logger.LogMessage("Processing commands");
-            if (this.cancellationTokenSource.IsCancellationRequested)
+            if (cancellationTokenSource.IsCancellationRequested)
                 logger.LogMessage("Cancellation");
-            while (!this.cancellationTokenSource.IsCancellationRequested) {
+            while (!cancellationTokenSource.IsCancellationRequested) {
                 try {
-                    IReceivedCommand command = await this.client.ReadAsync(this.cancellationTokenSource.Token);
+                    IReceivedCommand command = await client.ReadAsync(cancellationTokenSource.Token);
                     Debug.WriteLine("Received: "+ command.CommandId.ToString());
                     logger.LogMessage("Received (ProcessCommands): " + command.CommandId.ToString());
-                    if (this.inflightCommands.ContainsKey(command.CommandId)) {
+                    if (inflightCommands.ContainsKey(command.CommandId)) {
                         logger.LogMessage("Inflight command");
-                        this.inflightCommands[command.CommandId].TrySetResult(command);
+                        inflightCommands[command.CommandId].TrySetResult(command);
                     }
 
-                    if (this.commandHandlers.ContainsKey(command.CommandId)) {
+                    if (commandHandlers.ContainsKey(command.CommandId)) {
                         logger.LogMessage("Command handler");
-                        var handler = this.commandHandlers[command.CommandId];
+                        var handler = commandHandlers[command.CommandId];
                         handler.ForEach(c => c.Update(command));
                     }
                 }
@@ -166,8 +196,8 @@ namespace CmdMessenger
         /// </summary>
         public void Stop() {
             logger.LogMessage("Stop");
-            this.cancellationTokenSource.Cancel();
-            this.client.Close();
+            cancellationTokenSource.Cancel();
+            client.Close();
         }
 
         public void Cancel() {
@@ -186,7 +216,7 @@ namespace CmdMessenger
         /// <returns>The commands response.</returns>
         public IReceivedCommand Send(ISendCommand command) {
             logger.LogMessage("Send: " + command.CommandId.ToString());
-            Task<IReceivedCommand> t = this.SendAsync(command);
+            Task<IReceivedCommand> t = SendAsync(command);
             try {
                 if (t.Result != null) {
                     logger.LogMessage("Received (Send): " + t.Result.CommandId.ToString());
@@ -206,11 +236,11 @@ namespace CmdMessenger
         public Task<IReceivedCommand> SendAsync(ISendCommand command) {
             var tcs = new CommandWarper();
             if (command.AckCommandId.HasValue) {
-                if (this.inflightCommands.ContainsKey(command.AckCommandId.Value)) {
-                    this.inflightCommands[command.AckCommandId.Value] = tcs;
+                if (inflightCommands.ContainsKey(command.AckCommandId.Value)) {
+                    inflightCommands[command.AckCommandId.Value] = tcs;
                 }
                 else {
-                    this.inflightCommands.Add(command.AckCommandId.Value, tcs);
+                    inflightCommands.Add(command.AckCommandId.Value, tcs);
                 }
             }
             else {
@@ -218,7 +248,7 @@ namespace CmdMessenger
             }
 
             try {
-                this.client.Send(command);
+                client.Send(command);
             }
             catch (Exception ex) {
                 tcs.Task.TrySetException(ex);
@@ -228,7 +258,7 @@ namespace CmdMessenger
         }
 
         private void ProcessTimedOutCommands(object obj) {
-            foreach (var command in this.inflightCommands.Values.ToList()
+            foreach (var command in inflightCommands.Values.ToList()
                 .Where(command => (DateTime.Now - command.TimeSent)
                 .TotalSeconds > CommandTimeOutDueTime)) {
                 command.TrySetCanceled();
@@ -241,11 +271,11 @@ namespace CmdMessenger
         /// <param name="commandId">The command Id to listen for.</param>
         /// <param name="observer">The action to execute when the command is received.</param>
         public void Register(int commandId, ICommandObserver observer) {
-            if (this.commandHandlers.ContainsKey(commandId)) {
-                this.commandHandlers[commandId].Add(observer);
+            if (commandHandlers.ContainsKey(commandId)) {
+                commandHandlers[commandId].Add(observer);
             }
             else {
-                this.commandHandlers[commandId] = new List<ICommandObserver>(new[] { observer });
+                commandHandlers[commandId] = new List<ICommandObserver>(new[] { observer });
             }
         }
 
@@ -255,7 +285,7 @@ namespace CmdMessenger
         /// <param name="commandId">The command Id to listen for.</param>
         /// <param name="observer">The action to execute when the command is received.</param>
         public void Register(int commandId, Action<IReceivedCommand> observer) {
-            this.Register(commandId, new CommandObserver(observer));
+            Register(commandId, new CommandObserver(observer));
         }
 
         /// <summary>
@@ -263,21 +293,20 @@ namespace CmdMessenger
         /// </summary>
         /// <filterpriority>2</filterpriority>
         public void Dispose() {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         private void Dispose(bool disposing) {
-            if (!this.disposed) {
+            if (!disposed) {
                 if (disposing) {
-                    this.client.Close();
-                    this.commandTimeOut.Dispose();
+                    client.Close();
+                    commandTimeOut.Dispose();
                 }
 
-                this.disposed = true;
+                disposed = true;
             }
         }
 
-        #endregion
     }
 }

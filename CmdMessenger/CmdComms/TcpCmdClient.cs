@@ -12,8 +12,6 @@ namespace CmdMessenger.CmdComms
     /// </summary>
     public class TcpCmdClient : CmdComms, IDisposable
     {
-        #region Fields
-
         /// <summary>
         /// The servers address.
         /// </summary>
@@ -36,21 +34,14 @@ namespace CmdMessenger.CmdComms
 
         private bool disposed;
 
-        #endregion
-
-        #region Constructor
-
         /// <summary> 
         /// Initializes a new instance of the <see cref="TcpCmdClient"/> class.
         /// </summary>
-        /// <param name="address">
-        /// The servers address.
-        /// </param>
-        /// <param name="port">
-        /// The port number.
-        /// </param>
-        public TcpCmdClient(string address, int port)
-            : this(new TcpClient(address, port)) {
+        /// <param name="address">The servers address.</param>
+        /// <param name="port">The port number.</param>
+        /// <param name="logger">Logger object for logging process messages</param>
+        public TcpCmdClient(string address, int port, ILogger logger)
+            : this(new TcpClient(address, port), logger) {
             transportChannel = TransportChannel.Network;
             this.address = address;
             this.port = port;
@@ -59,24 +50,19 @@ namespace CmdMessenger.CmdComms
         /// <summary>
         /// Initializes a new instance of the <see cref="TcpCmdClient"/> class.
         /// </summary>
-        /// <param name="tcpClient"></param>
-        public TcpCmdClient(TcpClient tcpClient) {
-            this.client = tcpClient;
+        /// <param name="tcpClient">The tcp client</param>
+        /// <param name="logger">Logger object for logging process messages</param>
+        public TcpCmdClient(TcpClient tcpClient, ILogger logger) : base(logger) {
+            client = tcpClient;
         }
-
-        #endregion
-
-        #region Methods
 
         /// <summary>
         /// Connect to the device.
         /// </summary>
-        /// <returns>
-        /// The <see cref="bool"/>.
-        /// </returns>
+        /// <returns>The <see cref="bool"/>.</returns>
         public sealed override Task OpenAsync() {
-            this.cts = new CancellationTokenSource();
-            return this.WaitForConnection();
+            cts = new CancellationTokenSource();
+            return WaitForConnection();
         }
 
         public sealed override bool IsOpen() {
@@ -86,7 +72,7 @@ namespace CmdMessenger.CmdComms
         private Task WaitForConnection() {
             var tcp = new TaskCompletionSource<bool>();
 
-            if (this.client.Connected) {
+            if (client.Connected) {
                 tcp.SetResult(true);
             }
             else {
@@ -96,12 +82,12 @@ namespace CmdMessenger.CmdComms
                     {
                         bool result;
                         do {
-                            result = this.CanConnect();
+                            result = CanConnect();
                         }
                         while (!result && !cts.IsCancellationRequested);
                         tcp.SetResult(result);
                     },
-                    this.cts.Token);
+                    cts.Token);
             }
 
             return tcp.Task;
@@ -110,7 +96,7 @@ namespace CmdMessenger.CmdComms
         private bool CanConnect() {
             bool result = false;
             try {
-                this.client.Connect(this.address, this.port);
+                client.Connect(address, port);
                 result = true;
             }
             catch (ObjectDisposedException ex) {
@@ -128,13 +114,13 @@ namespace CmdMessenger.CmdComms
         /// </summary>
         public sealed override void Close() {
             Trace.TraceInformation("Close");
-            if (this.cts != null) {
-                this.cts.Cancel();
+            if (cts != null) {
+                cts.Cancel();
             }
 
             if (client != null) {
-                this.client.Close();
-                this.client = null;
+                client.Close();
+                client = null;
             }
         }
 
@@ -143,26 +129,25 @@ namespace CmdMessenger.CmdComms
         /// </summary>
         /// <returns>The stream.</returns>
         protected sealed override Stream GetStream() {
-            return this.client.GetStream();
+            return client.GetStream();
         }
 
         public void Dispose() {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         private void Dispose(bool disposing) {
-            if (!this.disposed) {
+            if (!disposed) {
                 if (disposing) {
-                    if (this.client != null) {
-                        this.client.Close();
+                    if (client != null) {
+                        client.Close();
                     }
                 }
 
-                this.disposed = true;
+                disposed = true;
             }
         }
 
-        #endregion
     }
 }

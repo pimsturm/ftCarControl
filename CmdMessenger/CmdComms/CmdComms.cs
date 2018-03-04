@@ -13,39 +13,29 @@ namespace CmdMessenger.CmdComms
     /// </summary>
     public abstract class CmdComms : ICmdComms
     {
-        #region Fields
 
-        /// <summary>
-        /// The encoder.
-        /// </summary>
         private readonly ASCIIEncoding encoder = new ASCIIEncoding();
 
-        /// <summary>
-        /// The escaping.
-        /// </summary>
         private readonly IEscaping escaping;
+
+        private ILogger logger;
 
         internal TransportChannel transportChannel;
 
-        #endregion
-
-        #region Properties
+        /// <summary>
+        /// Gets the transport channel
+        /// </summary>
         TransportChannel ICmdComms.TransportChannel {
             get {
                 return transportChannel;
             }
         }
 
-        public ILogger Logger { get; set; }
-        #endregion
-
-        #region Constructors
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CmdComms"/> class. 
         /// </summary>
-        protected CmdComms()
-            : this(Escaping.Default) {
+        protected CmdComms(ILogger logger)
+            : this(logger, Escaping.Default) {
         }
 
         /// <summary>
@@ -54,13 +44,10 @@ namespace CmdMessenger.CmdComms
         /// <param name="escaping">
         /// The escaping instance.
         /// </param>
-        protected CmdComms(IEscaping escaping) {
+        protected CmdComms(ILogger logger, IEscaping escaping) {
             this.escaping = escaping;
+            this.logger = logger ?? throw new ArgumentNullException("logger");
         }
-
-        #endregion
-
-        #region Methods
 
         /// <summary>
         /// Connect to the device.
@@ -97,14 +84,18 @@ namespace CmdMessenger.CmdComms
         public Task SendAsync(ISendCommand command) {
             byte[] bytes = encoder.GetBytes(command.GetCommand());
             var tcs = new TaskCompletionSource<bool>();
-            try {
-                Stream stream = GetStream();
-                stream.WriteAsync(bytes, 0, bytes.Length).Wait();
+            Task.Factory.StartNew(() => {
+                try {
+                    Stream stream = GetStream();
+                    stream.WriteAsync(bytes, 0, bytes.Length);
+                }
+                catch (Exception ex) {
+                    LogMessage(ex.Message);
+                    tcs.TrySetException(ex);
+                }
                 tcs.SetResult(true);
-            }
-            catch (Exception ex) {
-                tcs.TrySetException(ex);
-            }
+            });
+
             return tcs.Task;
         }
 
@@ -128,9 +119,12 @@ namespace CmdMessenger.CmdComms
             return tcs.Task;
         }
 
+        internal void LogMessage(string message) {
+            logger.LogMessage(message);
+        }
+
         private async void ReadAsync(TaskCompletionSource<IReceivedCommand> tcs, CancellationToken token) {
-            if (Logger != null)
-                Logger.LogMessage("ReadAsync");
+            LogMessage("ReadAsync");
             if (!token.IsCancellationRequested) {
                 try {
                     int packetSize = 5000;
@@ -160,21 +154,18 @@ namespace CmdMessenger.CmdComms
                         }
 
                         if (result != null) {
-                            if (Logger != null)
-                                Logger.LogMessage("Result: " + Encoding.Default.GetString(result));
+                            LogMessage("Result: " + Encoding.Default.GetString(result));
                             tcs.SetResult(ReceivedCommand.Create(escaping.GetUnescapedParameters(result)));
                         }
                     }
 
                 }
                 catch (ObjectDisposedException e) {
-                    if (Logger != null)
-                        Logger.LogMessage("ReadAsync: ObjectDisposedException " + e.Message);
+                    LogMessage("ReadAsync: ObjectDisposedException " + e.Message);
                     tcs.TrySetCanceled();
                 }
                 catch (Exception) {
-                    if (Logger != null)
-                        Logger.LogMessage("ReadAsync: Exception");
+                    LogMessage("ReadAsync: Exception");
                     tcs.TrySetCanceled();
                 }
             }
@@ -197,6 +188,5 @@ namespace CmdMessenger.CmdComms
 
         protected abstract Stream GetStream();
 
-        #endregion
     }
 }

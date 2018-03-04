@@ -10,19 +10,10 @@ namespace CmdMessenger.CmdComms
     /// </summary>
     public interface ICmdComms
     {
-        #region properties
         /// <summary>
         /// Gets the transport channel.
         /// </summary>
         TransportChannel TransportChannel { get; }
-
-        /// <summary>
-        /// Gets or sets the logger object
-        /// </summary>
-        ILogger Logger { get; set; }
-        #endregion
-
-        #region Methods
 
         /// <summary>
         /// Connect to the device.
@@ -60,6 +51,5 @@ namespace CmdMessenger.CmdComms
         /// <returns>The command read from the stream.</returns>
         Task<IReceivedCommand> ReadAsync(CancellationToken token);
 
-        #endregion
     }
 }

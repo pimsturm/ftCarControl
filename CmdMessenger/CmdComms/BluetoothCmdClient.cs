@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using InTheHand.Net;
@@ -19,7 +18,12 @@ namespace CmdMessenger.CmdComms
         private bool disposed;
         private BluetoothAddress btAddress;
 
-        public BluetoothCmdClient (string address) {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BluetoothCmdClient"/> class.
+        /// </summary>
+        /// <param name="address">The address of the bluetooth device</param>
+        /// <param name="logger">Logger object</param>
+        public BluetoothCmdClient (string address, ILogger logger) : base(logger) {
             transportChannel = TransportChannel.BlueTooth;
             btAddress = BluetoothAddress.Parse(address);
             localEndpoint = new BluetoothEndPoint(btAddress, BluetoothService.SerialPort);
@@ -29,9 +33,7 @@ namespace CmdMessenger.CmdComms
         /// <summary>
         /// Connect to the device.
         /// </summary>
-        /// <returns>
-        /// The <see cref="bool"/>.
-        /// </returns>
+        /// <returns>The <see cref="bool"/>.</returns>
         public sealed override Task OpenAsync() {
             var tcs = new TaskCompletionSource<bool>();
             Task.Factory.StartNew(() => {
@@ -55,31 +57,29 @@ namespace CmdMessenger.CmdComms
         /// The close.
         /// </summary>
         public sealed override void Close() {
-            this.localClient.Close();
+            localClient.Close();
         }
 
         /// <summary>
         /// The get stream.
         /// </summary>
-        /// <returns>
-        /// The <see cref="Stream"/>.
-        /// </returns>
+        /// <returns>The <see cref="Stream"/>.</returns>
         protected sealed override Stream GetStream() {
-            return this.localClient.GetStream();
+            return localClient.GetStream();
         }
 
         public void Dispose() {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing) {
-            if (!this.disposed) {
+            if (!disposed) {
                 if (disposing) {
-                    this.localClient.Dispose();
+                    localClient.Dispose();
                 }
 
-                this.disposed = true;
+                disposed = true;
             }
         }
     }

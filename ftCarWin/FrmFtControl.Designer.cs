@@ -29,7 +29,7 @@
             treeNode4,
             treeNode5});
             this.splitNavBar = new System.Windows.Forms.SplitContainer();
-            this.tvCarControl = new System.Windows.Forms.TreeView();
+            this.carControlTreeView = new System.Windows.Forms.TreeView();
             ((System.ComponentModel.ISupportInitialize)(this.splitNavBar)).BeginInit();
             this.splitNavBar.Panel1.SuspendLayout();
             this.splitNavBar.SuspendLayout();
@@ -44,27 +44,27 @@
             // 
             // splitNavBar.Panel1
             // 
-            this.splitNavBar.Panel1.Controls.Add(this.tvCarControl);
+            this.splitNavBar.Panel1.Controls.Add(this.carControlTreeView);
             this.splitNavBar.Size = new System.Drawing.Size(668, 450);
             this.splitNavBar.SplitterDistance = 153;
             this.splitNavBar.TabIndex = 0;
             // 
             // tvCarControl
             // 
-            this.tvCarControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tvCarControl.Location = new System.Drawing.Point(0, 0);
-            this.tvCarControl.Name = "tvCarControl";
+            this.carControlTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.carControlTreeView.Location = new System.Drawing.Point(0, 0);
+            this.carControlTreeView.Name = "tvCarControl";
             treeNode4.Name = "NodeButtonControl";
             treeNode4.Text = "Button Control";
             treeNode5.Name = "NodeSettings";
             treeNode5.Text = "Settings";
             treeNode6.Name = "NodeFt";
             treeNode6.Text = "ft Car Control";
-            this.tvCarControl.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
+            this.carControlTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
             treeNode6});
-            this.tvCarControl.Size = new System.Drawing.Size(153, 450);
-            this.tvCarControl.TabIndex = 0;
-            this.tvCarControl.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvCarControl_AfterSelect);
+            this.carControlTreeView.Size = new System.Drawing.Size(153, 450);
+            this.carControlTreeView.TabIndex = 0;
+            this.carControlTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.CarControlTreeViewAfterSelect);
             // 
             // FrmFtControl
             // 
@@ -85,7 +85,7 @@
         #endregion
 
         private System.Windows.Forms.SplitContainer splitNavBar;
-        private System.Windows.Forms.TreeView tvCarControl;
+        private System.Windows.Forms.TreeView carControlTreeView;
 
     }
 }
