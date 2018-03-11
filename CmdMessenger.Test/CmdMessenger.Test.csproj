@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Blocking.cs" />
     <Compile Include="CmdCommsTest\MockClient.cs" />
+    <Compile Include="CmdCommsTest\SerialCmdClientTest.cs" />
     <Compile Include="CmdMessengerTest.cs" />
     <Compile Include="Commands\ReceivedCommandTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

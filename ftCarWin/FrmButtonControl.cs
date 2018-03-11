@@ -49,9 +49,9 @@ namespace ftCarWin
                     client = new BluetoothCmdClient("30:15:01:07:11:28", this);
                 }
                 else {
-                    LogMessage("Create new serial client");
-                    client = new SerialCmdClient("COM7", 9600, this);
-                    //client = null;
+                    //LogMessage("Create new serial client");
+                    //client = new SerialCmdClient("COM7", 9600, this);
+                    client = null;
                 }
                 messenger = new CmdMessenger.CmdMessenger(client, this)
                 {

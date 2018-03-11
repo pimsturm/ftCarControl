@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Ports;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace CmdMessenger.CmdComms
 {
@@ -17,6 +18,16 @@ namespace CmdMessenger.CmdComms
         private bool disposed;
 
         /// <summary>
+        /// Gets or sets the name of the serial port
+        /// </summary>
+        public string PortName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the baudrate
+        /// </summary>
+        public int BaudRate { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SerialCmdClient"/> class.
         /// </summary>
         /// <param name="port">The port name.</param>
@@ -27,27 +38,65 @@ namespace CmdMessenger.CmdComms
                 throw new ArgumentNullException("port");
 
             transportChannel = TransportChannel.SerialPort;
+            PortName = port;
+            BaudRate = baud;
             serial = new SerialPort(port, baud);
         }
 
         /// <summary>
-        /// Connect to the device.
+        /// Initializes a new instance of the <see cref="SerialCmdClient"/> class.
         /// </summary>
-        /// <returns>
-        /// The <see cref="bool"/>.
-        /// </returns>
-        public sealed override Task OpenAsync() {
+        /// <param name="logger"> Logger object</param>
+        public SerialCmdClient(ILogger logger) : base(logger) {
+
+            transportChannel = TransportChannel.SerialPort;
+            serial = new SerialPort();
+        }
+
+        /// <summary>
+        /// Opens the serial port.
+        /// </summary>
+        /// <returns>The task return true of the port is successfully opened.</returns>
+        public sealed override async Task<bool> OpenAsync() {
             var tcs = new TaskCompletionSource<bool>();
-            Task.Factory.StartNew(() => {
-                try {
-                    if (!IsOpen())
-                        serial.Open();
+            var success = true;
+            try {
+                var cancellationTokenSourceTimeout = new CancellationTokenSource(1000);
+                var op = OpenPort();
+                success = await op.WithCancellation(cancellationTokenSourceTimeout.Token);
+            }
+            catch (OperationCanceledException) {
+                LogMessage("Canceled opening port: " + PortName);
+                success = false;
+            }
+            tcs.SetResult(success);
+            return success;
+        }
+
+        private Task<bool> OpenPort() {
+            var tcs = new TaskCompletionSource<bool>();
+            var success = true;
+            try {
+                if (serial.IsOpen) {
+                    LogMessage("Closing serial port.");
+                    serial.DiscardInBuffer();
+                    serial.DiscardOutBuffer();
+                    serial.Close();
                 }
-                catch (UnauthorizedAccessException e) {
-                    LogMessage("Unauthorized: " + e.Message);
-                }
-                tcs.SetResult(true);
-            });
+                LogMessage("Opening port: " + PortName);
+                serial.PortName = PortName;
+                serial.BaudRate = BaudRate;
+                serial.Open();
+            }
+            catch (UnauthorizedAccessException e) {
+                LogMessage("Unauthorized: " + e.Message);
+                success = false;
+            }
+            catch (IOException e) {
+                LogMessage("IOException: " + e.Message);
+                success = false;
+            }
+            tcs.SetResult(success);
             return tcs.Task;
         }
 
@@ -70,19 +119,26 @@ namespace CmdMessenger.CmdComms
         /// <summary>
         /// The get stream.
         /// </summary>
-        /// <returns>
-        /// The <see cref="Stream"/>.
-        /// </returns>
+        /// <returns>The <see cref="Stream"/>.</returns>
         protected sealed override Stream GetStream() {
             return serial.BaseStream;
         }
 
+        /// <summary>
+        /// Public implementation of Dispose pattern callable by consumers.
+        /// </summary>
         public void Dispose() {
             LogMessage("Dispose serial client");
+            // Dispose of unmanaged resources.
             Dispose(true);
+            // Suppress finalization.
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Protected implementation of Dispose pattern.
+        /// </summary>
+        /// <param name="disposing">true when the called from dispose, false when called from a finalizer.</param>
         protected virtual void Dispose(bool disposing) {
             if (!disposed) {
                 if (disposing) {

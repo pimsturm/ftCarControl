@@ -34,7 +34,7 @@ namespace CmdMessenger.CmdComms
         /// Connect to the device.
         /// </summary>
         /// <returns>The <see cref="bool"/>.</returns>
-        public sealed override Task OpenAsync() {
+        public sealed override Task<bool> OpenAsync() {
             var tcs = new TaskCompletionSource<bool>();
             Task.Factory.StartNew(() => {
 
@@ -68,11 +68,20 @@ namespace CmdMessenger.CmdComms
             return localClient.GetStream();
         }
 
+        /// <summary>
+        /// Public implementation of Dispose pattern callable by consumers.
+        /// </summary>
         public void Dispose() {
+            // Dispose of unmanaged resources.
             Dispose(true);
+            // Suppress finalization.
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Protected implementation of Dispose pattern.
+        /// </summary>
+        /// <param name="disposing">true when the called from dispose, false when called from a finalizer.</param>
         protected virtual void Dispose(bool disposing) {
             if (!disposed) {
                 if (disposing) {

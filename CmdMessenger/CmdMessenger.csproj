@@ -61,6 +61,7 @@
     <Compile Include="IEscaping.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaskExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

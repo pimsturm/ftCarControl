@@ -60,7 +60,7 @@ namespace CmdMessenger.CmdComms
         /// Connect to the device.
         /// </summary>
         /// <returns>The <see cref="bool"/>.</returns>
-        public sealed override Task OpenAsync() {
+        public sealed override Task<bool> OpenAsync() {
             cts = new CancellationTokenSource();
             return WaitForConnection();
         }
@@ -69,7 +69,7 @@ namespace CmdMessenger.CmdComms
             throw new NotImplementedException();
         }
 
-        private Task WaitForConnection() {
+        private Task<bool> WaitForConnection() {
             var tcp = new TaskCompletionSource<bool>();
 
             if (client.Connected) {
@@ -132,11 +132,18 @@ namespace CmdMessenger.CmdComms
             return client.GetStream();
         }
 
+        /// <summary>
+        /// Public implementation of Dispose pattern callable by consumers.
+        /// </summary>
         public void Dispose() {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Protected implementation of Dispose pattern.
+        /// </summary>
+        /// <param name="disposing">true when the called from dispose, false when called from a finalizer.</param>
         private void Dispose(bool disposing) {
             if (!disposed) {
                 if (disposing) {

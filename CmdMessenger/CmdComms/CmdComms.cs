@@ -52,10 +52,8 @@ namespace CmdMessenger.CmdComms
         /// <summary>
         /// Connect to the device.
         /// </summary>
-        /// <returns>
-        /// The <see cref="bool"/>.
-        /// </returns>
-        public abstract Task OpenAsync();
+        /// <returns>The task return true of the port is successfully opened.</returns>
+        public abstract Task<bool> OpenAsync();
 
         /// <summary>
         /// Close the communication port.
@@ -65,38 +63,44 @@ namespace CmdMessenger.CmdComms
         /// <summary>
         /// Checks if the communication port is open
         /// </summary>
-        /// <returns>True if the port is open</returns>
+        /// <returns><code>true</code> if the port is open</returns>
         public abstract bool IsOpen();
 
         /// <summary>
         /// Writes a parameter to the serial port.
         /// </summary>
         /// <param name="command">The command to send.</param>
-        public void Send(ISendCommand command) {
-            SendAsync(command).Wait();
+        /// <param name="token">Token for monitoring the cancellation status</param>
+        public void Send(ISendCommand command, CancellationToken token) {
+            SendAsync(command, token).Wait();
         }
 
         /// <summary>
         /// Writes async to the serial port.
         /// </summary>
         /// <param name="command">The command to send.</param>
+        /// <param name="token">Token for monitoring the cancellation status</param>
         /// <returns>The completed task.</returns>
-        public Task SendAsync(ISendCommand command) {
-            byte[] bytes = encoder.GetBytes(command.GetCommand());
+        public Task<bool> SendAsync(ISendCommand command, CancellationToken token) {
             var tcs = new TaskCompletionSource<bool>();
-            Task.Factory.StartNew(() => {
+            SendAsync(command, tcs, token);
+            return tcs.Task;
+        }
+
+        private async void SendAsync(ISendCommand command, TaskCompletionSource<bool> tcs, CancellationToken token) {
+            LogMessage("SendAsync");
+            byte[] bytes = encoder.GetBytes(command.GetCommand());
+            if (!token.IsCancellationRequested) {
                 try {
                     Stream stream = GetStream();
-                    stream.WriteAsync(bytes, 0, bytes.Length);
+                    await stream.WriteAsync(bytes, 0, bytes.Length, token);
+                    tcs.SetResult(true);
                 }
                 catch (Exception ex) {
-                    LogMessage(ex.Message);
-                    tcs.TrySetException(ex);
+                    LogMessage("Exception SendAsync: " + ex.Message);
+                    tcs.TrySetCanceled();
                 }
-                tcs.SetResult(true);
-            });
-
-            return tcs.Task;
+            }
         }
 
         /// <summary>
@@ -140,7 +144,7 @@ namespace CmdMessenger.CmdComms
 
                         // Read Data
                         while (continueReading) {
-                            continueReading = (count = await stream.ReadAsync(buffer, 0, packetSize - bytesReceived > buffer.Length ? buffer.Length : packetSize - bytesReceived)) > 0;
+                            continueReading = (count = await stream.ReadAsync(buffer, 0, packetSize - bytesReceived > buffer.Length ? buffer.Length : packetSize - bytesReceived, token)) > 0;
                             if (continueReading) {
                                 // Save Data
                                 ms.Write(buffer, 0, count);

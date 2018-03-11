@@ -34,7 +34,7 @@ namespace CmdMessenger.Test.CmdCommsTest
             return stream;
         }
 
-        public override Task OpenAsync() {
+        public override Task<bool> OpenAsync() {
             var tcs = new TaskCompletionSource<bool>();
             tcs.SetResult(true);
             return tcs.Task;

@@ -107,44 +107,78 @@ namespace CmdMessenger
         /// Find the COM port to which the Arduino is connected
         /// </summary>
         public async Task<bool> FindComPort() {
+            bool arduinoFound = false;
             var tcs = new TaskCompletionSource<bool>();
-            await Task.Factory.StartNew(async () => {
+            await Task.Run(async () => {
                 try {
                     string[] ports = SerialPort.GetPortNames();
+                    var clientTmp = new SerialCmdClient(logger);
                     foreach (string port in ports) {
-                        client = new SerialCmdClient(port, 9600, logger);
                         logger.LogMessage("Trying serial port: " + port);
-                        await client.OpenAsync();
-                        if (await DetectArduino()) {
-                            logger.LogMessage("Arduino is connected to serial port: " + port);
-                            break;
-                        }
-                        else {
-                            Stop();
-                            client = null;
+                        clientTmp.PortName = port;
+                        clientTmp.BaudRate = 9600;
+                        if (await clientTmp.OpenAsync()) {
+
+                            client = clientTmp;
+                            if (await DetectArduino()) {
+                                logger.LogMessage("Arduino is connected to serial port: " + port);
+                                arduinoFound = true;
+                                break;
+                            }
                         }
                     }
                 }
                 catch (Exception e) {
                     logger.LogMessage("Exception while detecting serial port: " + e.Message);
                 }
-                tcs.SetResult(true);
+                if (!arduinoFound) {
+                    logger.LogMessage("No Arduino found on a serial port.");
+                }
+                tcs.SetResult(arduinoFound);
             });
             return await tcs.Task;
         }
 
         private async Task<bool> DetectArduino() {
             bool found = false;
-            IReceivedCommand result = Send(PingCommand);
+
             try {
-                IReceivedCommand command = await client.ReadAsync(cancellationTokenSource.Token);
-                found = (command.ReadString() == "BFAF4176-766E-436A-ADF2-96133C02B03C");
+                var cancellationTokenSourceTimeout = new CancellationTokenSource(1000);
+                var cancellationTokenSourceSend = new CancellationTokenSource(1000);
+                try {
+                    var op = client.SendAsync(PingCommand, cancellationTokenSourceSend.Token);
+                    await op.WithCancellation(cancellationTokenSourceTimeout.Token);
+                }
+                catch (OperationCanceledException) {
+                    logger.LogMessage("Cancelled after time-out while sending on serial port.");
+                    cancellationTokenSourceSend.Cancel();
+                    return false;
+                }
+
+            }
+            catch (Exception e) {
+                logger.LogMessage("Exception while sending on serial port: " + e.Message);
+                return false;
+            }
+
+            try {
+                var cancellationTokenSourceTimeout = new CancellationTokenSource(1000);
+                try {
+                    Task<IReceivedCommand> op = client.ReadAsync(cancellationTokenSource.Token);
+                    var command = await op.WithCancellation(cancellationTokenSourceTimeout.Token);
+                    found = (command != null) && (command.ReadString() == "BFAF4176-766E-436A-ADF2-96133C02B03C");
+                }
+                catch (OperationCanceledException) {
+                    logger.LogMessage("Cancelled after time-out while receiving on serial port.");
+                    return false;
+                }
 
             }
             catch (Exception e) {
                 logger.LogMessage("Exception while reading serial port: " + e.Message);
+                return false;
             }
-            
+
             return found;
         }
 
@@ -154,21 +188,22 @@ namespace CmdMessenger
         public async void Start() {
             commandTimeOut.Change(500, 500);
 
-            if (client == null)
-                await FindComPort();
+            if (client == null) {
+                var arduinoFound = await FindComPort();
+                if (!arduinoFound)
+                    return;
+            }
 
-            if (client == null)
-                return;
+            if (!client.IsOpen())
+                await client.OpenAsync();
 
-            await client.OpenAsync();
             logger.LogMessage("Connection opened");
             ProcessCommands();
         }
 
         private async void ProcessCommands() {
             logger.LogMessage("Processing commands");
-            if (cancellationTokenSource.IsCancellationRequested)
-                logger.LogMessage("Cancellation");
+            cancellationTokenSource = new CancellationTokenSource();
             while (!cancellationTokenSource.IsCancellationRequested) {
                 try {
                     IReceivedCommand command = await client.ReadAsync(cancellationTokenSource.Token);
@@ -198,15 +233,6 @@ namespace CmdMessenger
             logger.LogMessage("Stop");
             cancellationTokenSource.Cancel();
             client.Close();
-        }
-
-        public void Cancel() {
-            cancellationTokenSource.Cancel();
-        }
-
-        public void Resume() {
-            cancellationTokenSource = new CancellationTokenSource();
-            ProcessCommands();
         }
 
         /// <summary>
@@ -248,7 +274,7 @@ namespace CmdMessenger
             }
 
             try {
-                client.Send(command);
+                client.SendAsync(command, cancellationTokenSource.Token);
             }
             catch (Exception ex) {
                 tcs.Task.TrySetException(ex);
