@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ftCarWin", "ftCarWin\ftCarWin.csproj", "{534F8DAD-F441-4F5B-965A-C64E5F9BCC0A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0BB12373-D8FB-459E-BBB3-689D2FE6B95C}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Packages", "Packages", "{884A5B1D-2916-4989-B47C-50B69A74E4A4}"
 EndProject
@@ -14,6 +17,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArduinoCommunicator", "ArduinoCommunicator\ArduinoCommunicator.csproj", "{A05CB237-94FB-452A-82CF-C0D559B61036}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CmdMessenger.Test", "CmdMessenger.Test\CmdMessenger.Test.csproj", "{5676C06B-51A6-4F66-9A31-1613D729A980}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{3B986701-278D-4675-BA06-EA2C77C6BCD3}"
+	ProjectSection(SolutionItems) = preProject
+		Images\Protocol.png = Images\Protocol.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +67,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{884A5B1D-2916-4989-B47C-50B69A74E4A4} = {0BB12373-D8FB-459E-BBB3-689D2FE6B95C}
+		{3B986701-278D-4675-BA06-EA2C77C6BCD3} = {0BB12373-D8FB-459E-BBB3-689D2FE6B95C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {74C832E8-8A1F-46BA-9170-7F6263C79093}
