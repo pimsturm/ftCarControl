@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Threading;
 using InTheHand.Net;
 using InTheHand.Net.Bluetooth;
 using InTheHand.Net.Sockets;
@@ -12,11 +13,14 @@ namespace CmdMessenger.CmdComms
     /// </summary>
     public class BluetoothCmdClient : CmdComms, IDisposable
     {
-        private BluetoothEndPoint localEndpoint;
         private BluetoothClient localClient; 
 
         private bool disposed;
-        private BluetoothAddress btAddress;
+
+        /// <summary>
+        /// Gets or sets the address of the Bluetooth device.
+        /// </summary>
+        public BluetoothAddress BtAddress { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BluetoothCmdClient"/> class.
@@ -25,8 +29,16 @@ namespace CmdMessenger.CmdComms
         /// <param name="logger">Logger object</param>
         public BluetoothCmdClient (string address, ILogger logger) : base(logger) {
             transportChannel = TransportChannel.BlueTooth;
-            btAddress = BluetoothAddress.Parse(address);
-            localEndpoint = new BluetoothEndPoint(btAddress, BluetoothService.SerialPort);
+            BtAddress = BluetoothAddress.Parse(address);
+            localClient = new BluetoothClient();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BluetoothCmdClient"/> class.
+        /// </summary>
+        /// <param name="logger">Logger object</param>
+        public BluetoothCmdClient(ILogger logger) : base(logger) {
+            transportChannel = TransportChannel.BlueTooth;
             localClient = new BluetoothClient();
         }
 
@@ -34,14 +46,59 @@ namespace CmdMessenger.CmdComms
         /// Connect to the device.
         /// </summary>
         /// <returns>The <see cref="bool"/>.</returns>
-        public sealed override Task<bool> OpenAsync() {
+        public sealed override async Task<bool> OpenAsync() {
             var tcs = new TaskCompletionSource<bool>();
-            Task.Factory.StartNew(() => {
+            var success = true;
+            try {
+                var cancellationTokenSourceTimeout = new CancellationTokenSource(30000);
+                var localEndpoint = new BluetoothEndPoint(BtAddress, BluetoothService.SerialPort);
+                var op = ExecuteConnectAsync(localClient, localEndpoint, null);
+                success = await op.WithCancellation(cancellationTokenSourceTimeout.Token);
+            }
+            catch (OperationCanceledException) {
+                LogMessage("Canceled connecting device: " + BtAddress.ToString());
+                success = false;
+            }
+            catch (Exception ex) {
+                LogMessage("Exception while connecting device: " + ex.Message);
+                success = false;
+            }
+            tcs.SetResult(success);
+            return success;
+        }
 
-                localClient.Connect(localEndpoint);
+        private Task<bool> ExecuteConnectAsync(BluetoothClient localClient, BluetoothEndPoint localEndpoint, object state) {
+            // this will be our sentry that will know when our async operation is completed
+            var tcs = new TaskCompletionSource<bool>();
 
-                tcs.SetResult(true);
-            });
+            try {
+                if (IsOpen()) {
+                    Close();
+                }
+                LogMessage("Connecting bluetooth device: ");
+
+                localClient.BeginConnect(localEndpoint, (iar) =>
+                {
+                    try {
+                        localClient.EndConnect(iar);
+                        tcs.TrySetResult(true);
+                    }
+                    catch (OperationCanceledException) {
+                        // if the inner operation was canceled, this task is cancelled too
+                        tcs.TrySetCanceled();
+                    }
+                    catch (Exception ex) {
+                        // general exception has been set
+                        tcs.TrySetException(ex);
+                        tcs.TrySetResult(false);
+                    }
+                }, state);
+            }
+            catch {
+                // propagate exceptions to the outside
+                throw;
+            }
+
             return tcs.Task;
         }
 
@@ -57,6 +114,7 @@ namespace CmdMessenger.CmdComms
         /// The close.
         /// </summary>
         public sealed override void Close() {
+            LogMessage("Closing Bluetooth connection.");
             localClient.Close();
         }
 

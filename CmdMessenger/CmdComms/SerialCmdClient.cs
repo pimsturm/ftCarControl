@@ -77,11 +77,8 @@ namespace CmdMessenger.CmdComms
             var tcs = new TaskCompletionSource<bool>();
             var success = true;
             try {
-                if (serial.IsOpen) {
-                    LogMessage("Closing serial port.");
-                    serial.DiscardInBuffer();
-                    serial.DiscardOutBuffer();
-                    serial.Close();
+                if (IsOpen()) {
+                    Close();
                 }
                 LogMessage("Opening port: " + PortName);
                 serial.PortName = PortName;
@@ -112,7 +109,9 @@ namespace CmdMessenger.CmdComms
         /// The close.
         /// </summary>
         public sealed override void Close() {
-            LogMessage("Close serial port");
+            LogMessage("Closing serial port.");
+            serial.DiscardInBuffer();
+            serial.DiscardOutBuffer();
             serial.Close();
         }
 

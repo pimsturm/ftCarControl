@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.IO.Ports;
+using InTheHand.Net.Sockets;
 using CmdMessenger.Commands;
 using CmdMessenger.CmdComms;
 
@@ -104,8 +105,47 @@ namespace CmdMessenger
         public ISendCommand PingCommand { get; set; }
 
         /// <summary>
+        /// Detect if the Arduino is a known bluetooth device
+        /// </summary>
+        /// <returns></returns>
+        public async Task<bool> FindBluetooth() {
+            bool arduinoFound = false;
+            var tcs = new TaskCompletionSource<bool>();
+            await Task.Run(async () => {
+                try {
+                    var localClient = new BluetoothClient();
+                    var deviceList = localClient.DiscoverDevices();
+                    foreach (BluetoothDeviceInfo device in deviceList) {
+                        logger.LogMessage("Trying Bluetooth device: " + device.DeviceName);
+                        var clientTmp = new BluetoothCmdClient(logger);
+                        clientTmp.BtAddress = device.DeviceAddress;
+                        if (await clientTmp.OpenAsync()) {
+
+                            client = clientTmp;
+                            if (await DetectArduino()) {
+                                logger.LogMessage("Arduino is connected to Bluetooth device: " + device.DeviceName);
+                                arduinoFound = true;
+                                break;
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception e) {
+                    logger.LogMessage("Exception while scanning bluetooth devices: " + e.Message);
+                }
+                if (!arduinoFound) {
+                    logger.LogMessage("None of the known bluetooth devices is the Arduino.");
+                }
+                tcs.SetResult(arduinoFound);
+            });
+            return await tcs.Task;
+        }
+
+        /// <summary>
         /// Find the COM port to which the Arduino is connected
         /// </summary>
+        /// <returns></returns>
         public async Task<bool> FindComPort() {
             bool arduinoFound = false;
             var tcs = new TaskCompletionSource<bool>();
@@ -189,7 +229,9 @@ namespace CmdMessenger
             commandTimeOut.Change(500, 500);
 
             if (client == null) {
-                var arduinoFound = await FindComPort();
+                var arduinoFound = await FindBluetooth();
+                if (!arduinoFound)
+                    arduinoFound = await FindComPort();
                 if (!arduinoFound)
                     return;
             }
