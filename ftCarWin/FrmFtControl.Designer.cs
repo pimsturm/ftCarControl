@@ -23,11 +23,12 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Button Control");
-            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Settings");
-            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("ft Car Control", new System.Windows.Forms.TreeNode[] {
-            treeNode4,
-            treeNode5});
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Button Control");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Settings");
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("ft Car Control", new System.Windows.Forms.TreeNode[] {
+            treeNode1,
+            treeNode2});
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmFtControl));
             this.splitNavBar = new System.Windows.Forms.SplitContainer();
             this.carControlTreeView = new System.Windows.Forms.TreeView();
             ((System.ComponentModel.ISupportInitialize)(this.splitNavBar)).BeginInit();
@@ -49,19 +50,19 @@
             this.splitNavBar.SplitterDistance = 153;
             this.splitNavBar.TabIndex = 0;
             // 
-            // tvCarControl
+            // carControlTreeView
             // 
             this.carControlTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.carControlTreeView.Location = new System.Drawing.Point(0, 0);
-            this.carControlTreeView.Name = "tvCarControl";
-            treeNode4.Name = "NodeButtonControl";
-            treeNode4.Text = "Button Control";
-            treeNode5.Name = "NodeSettings";
-            treeNode5.Text = "Settings";
-            treeNode6.Name = "NodeFt";
-            treeNode6.Text = "ft Car Control";
+            this.carControlTreeView.Name = "carControlTreeView";
+            treeNode1.Name = "NodeButtonControl";
+            treeNode1.Text = "Button Control";
+            treeNode2.Name = "NodeSettings";
+            treeNode2.Text = "Settings";
+            treeNode3.Name = "NodeFt";
+            treeNode3.Text = "ft Car Control";
             this.carControlTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode6});
+            treeNode3});
             this.carControlTreeView.Size = new System.Drawing.Size(153, 450);
             this.carControlTreeView.TabIndex = 0;
             this.carControlTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.CarControlTreeViewAfterSelect);
@@ -72,6 +73,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(668, 450);
             this.Controls.Add(this.splitNavBar);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FrmFtControl";
             this.Text = "fischertechnik Car Control";
             this.Load += new System.EventHandler(this.FrmFtControl_Load);

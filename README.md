@@ -5,12 +5,14 @@ Windows client to control the fischertechnik with arduino car
 Windows client for remote control of an Arduino including an implementation of CmdMessenger.
 
 # Pre-requisites
-
-https://github.com/inthehand/32feet
-https://www.codeproject.com/Articles/842951/CmdMessenger
+- [The Arduino - CmdMessenger library](https://github.com/thijse/Arduino-CmdMessenger)
+- [Motor shield library](https://github.com/adafruit/Adafruit-Motor-Shield-library)
+- Arduino Uno with motor shield and optionally bluetooth or Wifi module
+- Arduino IDE
+- Visual Studio
 
 # Screenshots
-
+![Ftcarcontrol](Images/ftcarcontrol.png)
 
 # Getting Started
 
@@ -61,8 +63,22 @@ ICmdComms provides a common interface for transport layers.
 ### CmdComms
 Provides a common implementation for reading commands from a stream. Other stream based transport layers can derive from this base class. Two implementation of the ICmdComms are provided with the library:
 - SerialCmdClient
+- BluetoothCmdClient
 - TcpCmdClient
 
+# Credits
+https://www.codeproject.com/Articles/842951/CmdMessenger
+
+[Arduino - CmdMessenger V4 by Thijs Elenbaas](https://github.com/thijse/Arduino-CmdMessenger)
+
+[Automatic detection of COM port](https://playground.arduino.cc/Csharp/SerialCommsCSharp)
 
 # License
-[The Microsoft Public License (Ms-PL)](http://www.opensource.org/licenses/ms-pl.html)
+[The Microsoft Public License (Ms-PL)](http://www.opensource.org/licenses/ms-pl.html)  © 2018 Pim Sturm
+
+This software includes the following components and resources:
+
+- Icon by [Iconshock](http://www.iconshock.com/)
+
+- https://github.com/inthehand/32feet (Bluetooth library)
+
